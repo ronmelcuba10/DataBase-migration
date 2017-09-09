@@ -234,6 +234,12 @@ CREATE TABLE [dbo].[MenuItem] (
 );
 
 
+CREATE TABLE [dbo].[MonitorStatus] (
+	[Id]						UNIQUEIDENTIFIER	NOT NULL,
+	[Name]						VARCHAR(32)			NOT NULL,
+);
+
+
 CREATE TABLE [dbo].[OutputStream] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,

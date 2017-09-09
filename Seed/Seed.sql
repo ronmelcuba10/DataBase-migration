@@ -41,6 +41,9 @@
 -- Grid  ****************************************************************************************************************************
 :r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedGrid.sql
 
+-- Monitor Status  ****************************************************************************************************************************
+:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedMonitorStatus.sql
+
 
 
 /*
