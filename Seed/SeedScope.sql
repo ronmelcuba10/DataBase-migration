@@ -1,5 +1,5 @@
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[Scope])
-	INSERT INTO [Scheduler].[dbo].[Scope]
+IF NOT EXISTS (SELECT * FROM .[dbo].[Scope])
+	INSERT INTO .[dbo].[Scope]
            ([Id]
            ,[Name]
            ,[Value])

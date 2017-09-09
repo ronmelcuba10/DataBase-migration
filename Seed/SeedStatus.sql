@@ -1,5 +1,5 @@
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[Status])
-	INSERT INTO [Scheduler].[dbo].[Status]
+IF NOT EXISTS (SELECT * FROM [dbo].[Status])
+	INSERT INTO [dbo].[Status]
            ([Name])
      VALUES
 			('All'),

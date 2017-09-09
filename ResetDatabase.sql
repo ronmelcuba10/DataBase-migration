@@ -7,15 +7,17 @@
 -- |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 -- Clears te database   ************************************************************************************
--- repeat until the database is clean
-:r E:\SQL\SchedulerProduction\MigrationScripts\ClearWholeDataBase.sql
+:r F:\SQL\SchedulerProduction\MigrationScripts\ClearWholeDataBase.sql
 
 -- Creates the database   **********************************************************************************
-:r E:\SQL\SchedulerProduction\MigrationScripts\Creation.sql
+:r F:\SQL\SchedulerProduction\MigrationScripts\Creation.sql
 
 -- Creates all the keys and constraints  *******************************************************************
-:r E:\SQL\SchedulerProduction\MigrationScripts\KeysAndConstraints.sql
+:r F:\SQL\SchedulerProduction\MigrationScripts\KeysAndConstraints.sql
 
 -- Seeds the database  *************************************************************************************
-:r E:\SQL\SchedulerProduction\MigrationScripts\Seed\Seed.sql
+:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\Seed.sql
+
+-- Stored Procedures   *************************************************************************************
+:r F:\SQL\SchedulerProduction\MigrationScripts\StoredProcedures\sp.sql
 

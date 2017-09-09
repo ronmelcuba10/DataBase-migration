@@ -1,5 +1,5 @@
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[Image])
-	INSERT INTO [Scheduler].[dbo].[Image]
+IF NOT EXISTS (SELECT * FROM .[dbo].[Image])
+	INSERT INTO .[dbo].[Image]
            ([Id]
            ,[Name]
            ,[Url])
@@ -998,8 +998,8 @@ IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[Image])
 			(NEWID(), 'Minus Red 128x128.png', '~/Images/Minus Red 128x128.png')
 
 
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[Image] WHERE [Name] = 'Minus Red 16x16.png')
-	INSERT INTO [Scheduler].[dbo].[Image]
+IF NOT EXISTS (SELECT * FROM .[dbo].[Image] WHERE [Name] = 'Minus Red 16x16.png')
+	INSERT INTO .[dbo].[Image]
            ([Id]
            ,[Name]
            ,[Url])

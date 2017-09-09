@@ -1,5 +1,5 @@
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[RoleType])
-	INSERT INTO [Scheduler].[dbo].[RoleType]
+IF NOT EXISTS (SELECT * FROM [dbo].[RoleType])
+	INSERT INTO [dbo].[RoleType]
            ([Id]
            ,[Name])
      VALUES

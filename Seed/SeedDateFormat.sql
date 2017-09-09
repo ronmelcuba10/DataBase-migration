@@ -1,5 +1,5 @@
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[DateFormat])
-	INSERT INTO [Scheduler].[dbo].[DateFormat]
+IF NOT EXISTS (SELECT * FROM [dbo].[DateFormat])
+	INSERT INTO [dbo].[DateFormat]
            ([Id]
            ,[Name]
            ,[IsDefault])

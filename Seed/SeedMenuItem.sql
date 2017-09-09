@@ -1,4 +1,4 @@
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[MenuItem])
+IF NOT EXISTS (SELECT * FROM .[dbo].[MenuItem])
 BEGIN
 	DECLARE @RootId UNIQUEIDENTIFIER = NEWID();
 	DECLARE @AdministrationId UNIQUEIDENTIFIER = NEWID();
@@ -28,7 +28,7 @@ Tag 16x16.png
 Web Pages 16x16.png
 
 	
-	INSERT INTO [Scheduler].[dbo].[MenuItem]
+	INSERT INTO .[dbo].[MenuItem]
 			   ([Id] ,[Name] ,[ParentId] ,[Title] ,[Index] ,[ToolTip] ,[ImageId] ,[PageId])
 		 VALUES
 				(@RootId, 'Root', 'NULL', 'Root Menu', '0', 'NULL', ,),

@@ -1,5 +1,5 @@
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[EventAction])
-	INSERT INTO [Scheduler].[dbo].[EventAction]
+IF NOT EXISTS (SELECT * FROM [dbo].[EventAction])
+	INSERT INTO [dbo].[EventAction]
            ([Id]
            ,[Name])
      VALUES

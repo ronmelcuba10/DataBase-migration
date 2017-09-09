@@ -1,6 +1,6 @@
 -- These scripts create the tables
 
-CREATE TABLE [Scheduler].[dbo].[Address] (
+CREATE TABLE [dbo].[Address] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Address1]					VARCHAR(100)		NOT NULL,
 	[Address2]					VARCHAR(50),
@@ -12,7 +12,7 @@ CREATE TABLE [Scheduler].[dbo].[Address] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Brand] (
+CREATE TABLE [dbo].[Brand] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[LoginBannerImageId]		UNIQUEIDENTIFIER	NOT NULL,
@@ -24,14 +24,14 @@ CREATE TABLE [Scheduler].[dbo].[Brand] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[BrandUrl] (
+CREATE TABLE [dbo].[BrandUrl] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[BrandId]					UNIQUEIDENTIFIER	NOT NULL,
 	[Url]						VARCHAR(100)		NOT NULL,
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Button] (
+CREATE TABLE [dbo].[Button] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[ImageId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE [Scheduler].[dbo].[Button] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Company] (
+CREATE TABLE [dbo].[Company] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[AddressId]					UNIQUEIDENTIFIER,
@@ -55,13 +55,13 @@ CREATE TABLE [Scheduler].[dbo].[Company] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[CompanyType] (
+CREATE TABLE [dbo].[CompanyType] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Type]						VARCHAR(50)			NOT NULL,
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Configuration] (
+CREATE TABLE [dbo].[Configuration] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[IntValue]					INT,
@@ -69,7 +69,7 @@ CREATE TABLE [Scheduler].[dbo].[Configuration] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Country] (
+CREATE TABLE [dbo].[Country] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[Code]						VARCHAR(10)			NOT NULL,
@@ -77,14 +77,14 @@ CREATE TABLE [Scheduler].[dbo].[Country] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[DateFormat] (
+CREATE TABLE [dbo].[DateFormat] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(10)			NOT NULL,
 	[IsDefault]					BIT,
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Device] (
+CREATE TABLE [dbo].[Device] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50),
 	[HostId]					UNIQUEIDENTIFIER,
@@ -94,19 +94,19 @@ CREATE TABLE [Scheduler].[dbo].[Device] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[DeviceSharedToCompany] (
+CREATE TABLE [dbo].[DeviceSharedToCompany] (
 	[DeviceId]					UNIQUEIDENTIFIER	NOT NULL,
 	[CompanyId]					UNIQUEIDENTIFIER	NOT NULL,
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Entity] (
+CREATE TABLE [dbo].[Entity] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Event] (
+CREATE TABLE [dbo].[Event] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[CompanyId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -140,17 +140,17 @@ CREATE TABLE [Scheduler].[dbo].[Event] (
 
 
 
-CREATE TABLE [Scheduler].[dbo].[EventAction] (
+CREATE TABLE [dbo].[EventAction] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[EventHistory] (
+CREATE TABLE [dbo].[EventHistory] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[EventId]					UNIQUEIDENTIFIER	NOT NULL,
 	[UserId]					UNIQUEIDENTIFIER,
-	[Modified]					DATETIME			NOT NULL,
+	[ModifiedOn]				DATETIME			NOT NULL,
 	[EventActionId]				UNIQUEIDENTIFIER,
 	[ClosedCaption]				BIT					NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
@@ -163,14 +163,14 @@ CREATE TABLE [Scheduler].[dbo].[EventHistory] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Grid] (
+CREATE TABLE [dbo].[Grid] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[Tag]						VARCHAR(50)			NOT NULL,
 	[PageId]					UNIQUEIDENTIFIER	NOT NULL
 );
 
-CREATE TABLE [Scheduler].[dbo].[Host] (
+CREATE TABLE [dbo].[Host] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[SerialNumber]				VARCHAR(20),
@@ -187,7 +187,7 @@ CREATE TABLE [Scheduler].[dbo].[Host] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[HostHistory] (
+CREATE TABLE [dbo].[HostHistory] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
 	[History]					VARCHAR(200),
@@ -196,14 +196,14 @@ CREATE TABLE [Scheduler].[dbo].[HostHistory] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Image] (
+CREATE TABLE [dbo].[Image] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[Url]						VARCHAR(100)		NOT NULL
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[InputStream] (
+CREATE TABLE [dbo].[InputStream] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ConfigFileName]			VARCHAR(100)		NOT NULL,
@@ -213,7 +213,7 @@ CREATE TABLE [Scheduler].[dbo].[InputStream] (
 	[SdiAudioConf]				VARCHAR(24),
 	[Arate]						VARCHAR(24),
 	[AudioChannels]				INT,
-	[Modified]					DATETIME,
+	[ModifiedOn]				DATETIME,
 	[LocalIP]					VARCHAR(16),
 	[LocalPort]					INT,
 	[InputMulticast]			BIT,
@@ -222,7 +222,7 @@ CREATE TABLE [Scheduler].[dbo].[InputStream] (
 	[Deleted]					BIT					NOT NULL
 );
 
-CREATE TABLE [Scheduler].[dbo].[MenuItem] (
+CREATE TABLE [dbo].[MenuItem] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(32)			NOT NULL,
 	[ParentId]					UNIQUEIDENTIFIER,
@@ -234,7 +234,7 @@ CREATE TABLE [Scheduler].[dbo].[MenuItem] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[OutputStream] (
+CREATE TABLE [dbo].[OutputStream] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ConfigFileName]			VARCHAR(100)		NOT NULL,
@@ -266,7 +266,7 @@ CREATE TABLE [Scheduler].[dbo].[OutputStream] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Page] (
+CREATE TABLE [dbo].[Page] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[BrowserTitle]				VARCHAR(50)	,
@@ -277,7 +277,7 @@ CREATE TABLE [Scheduler].[dbo].[Page] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[PageButton] (
+CREATE TABLE [dbo].[PageButton] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[PageId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ButtonId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -288,14 +288,14 @@ CREATE TABLE [Scheduler].[dbo].[PageButton] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Permission] (
+CREATE TABLE [dbo].[Permission] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[ObjectiveId]				UNIQUEIDENTIFIER,
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Person] (
+CREATE TABLE [dbo].[Person] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[FirstName]					VARCHAR(50),
 	[LastName]					VARCHAR(50),
@@ -307,7 +307,7 @@ CREATE TABLE [Scheduler].[dbo].[Person] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Phone] (
+CREATE TABLE [dbo].[Phone] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[CountryId]					UNIQUEIDENTIFIER,
 	[AreaCode]					VARCHAR(5),
@@ -319,7 +319,7 @@ CREATE TABLE [Scheduler].[dbo].[Phone] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[PleClientStreamConfig] (
+CREATE TABLE [dbo].[PleClientStreamConfig] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ConfigFileName]			VARCHAR(100)		NOT NULL,
@@ -337,14 +337,14 @@ CREATE TABLE [Scheduler].[dbo].[PleClientStreamConfig] (
 	[Deleted]					BIT					NOT NULL,
 );
 
-CREATE TABLE [Scheduler].[dbo].[PleServerConfig] (
+CREATE TABLE [dbo].[PleServerConfig] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ConfigFileName]			VARCHAR(100)		NOT NULL,
 	[InputName]					VARCHAR(32),
 	[BindIP]					VARCHAR(16),
 	[Port]						INT,
-	[Modified]					DATETIME,
+	[ModifiedOn]				DATETIME,
 	[LanIPAddress]				VARCHAR(16),
 	[AltIPAddress]				VARCHAR(16),
 	[Deleted]					BIT					NOT NULL,
@@ -352,7 +352,7 @@ CREATE TABLE [Scheduler].[dbo].[PleServerConfig] (
 
 
 
-CREATE TABLE [Scheduler].[dbo].[PleServerStream] (
+CREATE TABLE [dbo].[PleServerStream] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ConfigFileName]			VARCHAR(100)		NOT NULL,
@@ -370,12 +370,12 @@ CREATE TABLE [Scheduler].[dbo].[PleServerStream] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[RoleType] (
+CREATE TABLE [dbo].[RoleType] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 );
 
-CREATE TABLE [Scheduler].[dbo].[Role] (
+CREATE TABLE [dbo].[Role] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[CompanyId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -383,7 +383,7 @@ CREATE TABLE [Scheduler].[dbo].[Role] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[RoleObjectScope] (
+CREATE TABLE [dbo].[RoleObjectScope] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[RoleId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ObjectId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -391,7 +391,7 @@ CREATE TABLE [Scheduler].[dbo].[RoleObjectScope] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[RolePermissionScopeEntity] (
+CREATE TABLE [dbo].[RolePermissionScopeEntity] (
 	[RoleId]					UNIQUEIDENTIFIER	NOT NULL,
 	[PermissionId]				UNIQUEIDENTIFIER	NOT NULL,
 	[ScopeId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -399,7 +399,7 @@ CREATE TABLE [Scheduler].[dbo].[RolePermissionScopeEntity] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[Scope] (
+CREATE TABLE [dbo].[Scope] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[Value]						INT					NOT NULL,
@@ -407,19 +407,19 @@ CREATE TABLE [Scheduler].[dbo].[Scope] (
 
 
 
-CREATE TABLE [Scheduler].[dbo].[State] (
+CREATE TABLE [dbo].[State] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[CountryId]					UNIQUEIDENTIFIER,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[PostalCode]				VARCHAR(5),
 );
 
-CREATE TABLE [Scheduler].[dbo].[Status] (
+CREATE TABLE [dbo].[Status] (
 	[Id]						INT	IDENTITY(1,1)	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 );
 
-CREATE TABLE [Scheduler].[dbo].[User] (
+CREATE TABLE [dbo].[User] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[Password]					VARCHAR(50)			NOT NULL,
@@ -434,7 +434,7 @@ CREATE TABLE [Scheduler].[dbo].[User] (
 
 
 
-CREATE TABLE [Scheduler].[dbo].[UserDashBoardItem] (
+CREATE TABLE [dbo].[UserDashBoardItem] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[UserId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ObjectId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -442,7 +442,7 @@ CREATE TABLE [Scheduler].[dbo].[UserDashBoardItem] (
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[UserHistory] (
+CREATE TABLE [dbo].[UserHistory] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[UserId]					UNIQUEIDENTIFIER	NOT NULL,
 	[LoginTime]					DATETIME			NOT NULL,
@@ -451,20 +451,20 @@ CREATE TABLE [Scheduler].[dbo].[UserHistory] (
 
 
 
-CREATE TABLE [Scheduler].[dbo].[UserRole] (
+CREATE TABLE [dbo].[UserRole] (
 	[UserId]					UNIQUEIDENTIFIER	NOT NULL,
 	[RoleId]					UNIQUEIDENTIFIER	NOT NULL,
 );
 
 
-CREATE TABLE [Scheduler].[dbo].[UserSetting] (
+CREATE TABLE [dbo].[UserSetting] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[UserId]					UNIQUEIDENTIFIER	NOT NULL,
 	[VideoProfileId]			UNIQUEIDENTIFIER,
 	[VideoBitrate]				VARCHAR(10),
 );
 
-CREATE TABLE [Scheduler].[dbo].[VideoProfile] (
+CREATE TABLE [dbo].[VideoProfile] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[VCodec]					VARCHAR(50)			NOT NULL,

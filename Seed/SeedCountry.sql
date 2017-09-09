@@ -1,6 +1,6 @@
 
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[Country])
-	INSERT INTO [Scheduler].[dbo].[Country]
+IF NOT EXISTS (SELECT * FROM [dbo].[Country])
+	INSERT INTO [dbo].[Country]
 			   ([Id]
 			   ,[Code]
 			   ,[Name])

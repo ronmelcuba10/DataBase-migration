@@ -1,5 +1,5 @@
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[Configuration])
-	INSERT INTO [Scheduler].[dbo].[Configuration]
+IF NOT EXISTS (SELECT * FROM [dbo].[Configuration])
+	INSERT INTO [dbo].[Configuration]
            ([Id]
            ,[Name]
            ,[IntValue]

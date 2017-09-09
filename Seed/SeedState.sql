@@ -4,8 +4,8 @@ DECLARE @UnitedStatesId UNIQUEIDENTIFIER = (SELECT [ID]
 												WHERE [Name] = 'United States')
 										
 
-IF NOT EXISTS (SELECT * FROM [Scheduler].[dbo].[State])
-	INSERT INTO [Scheduler].[dbo].[State]
+IF NOT EXISTS (SELECT * FROM [dbo].[State])
+	INSERT INTO [dbo].[State]
 			   ([Id]
 			   ,[CountryId]
 			   ,[PostalCode]
