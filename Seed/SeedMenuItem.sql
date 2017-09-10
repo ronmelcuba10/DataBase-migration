@@ -2,30 +2,26 @@ IF NOT EXISTS (SELECT * FROM .[dbo].[MenuItem])
 BEGIN
 	-- initializing variables
 
-	-- MenuitemsId variables
+	-- MenuitemsId variables indented to show parent relationship
 	DECLARE @RootMenuItemId UNIQUEIDENTIFIER = NEWID();
 		DECLARE @MainMenuMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @DashboardMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @CustomersdMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @HostsMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @BrandsMenuItemId UNIQUEIDENTIFIER = NEWID();
-
 		DECLARE @EventsMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @MonitorMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @ScheduleMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @AlertsMenuItemId UNIQUEIDENTIFIER = NEWID();
-
 		DECLARE @SecurityMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @RolesMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @UsersMenuItemId UNIQUEIDENTIFIER = NEWID();
-
 		DECLARE @SettingsMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @PagesMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @ButtonsMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @ImagesMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @MenuItemsMenuItemId UNIQUEIDENTIFIER = NEWID();
 			DECLARE @AdministrationMenuItemId UNIQUEIDENTIFIER = NEWID();
-
 		DECLARE @ReportsMenuItemId UNIQUEIDENTIFIER = NEWID();
 
 
@@ -97,7 +93,7 @@ Web Pages 16x16.png
 
 	
 	INSERT INTO .[dbo].[MenuItem]
-			   ([Id] ,						[Name] ,			[ParentId] ,			[Title] ,	  [Index] ,[ToolTip] ,[ImageId] ,[PageId])
+			   ([Id] ,						[Name] ,			[ParentId] ,			[Title] ,	  [Index] ,[ToolTip] ,[ImageId] ,[Size],[PageId])
 		 VALUES
 				(@RootMenuItemId,			'Root',				'NULL',					'Root Menu',		0, 'NULL',								,),
 				(@UsersMenuItemId,			'Users',			@SecurityMenuItemId,	'Users',			1, 'Manage Users',						,),

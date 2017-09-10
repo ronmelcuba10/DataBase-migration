@@ -35,6 +35,7 @@ CREATE TABLE [dbo].[Button] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[ImageId]					UNIQUEIDENTIFIER	NOT NULL,
+	[Size]						INT					NOT NULL,
 	[IsHome]					BIT					NOT NULL
 );
 
@@ -230,6 +231,7 @@ CREATE TABLE [dbo].[MenuItem] (
 	[Index]						INT					NOT NULL,
 	[ToolTip]					VARCHAR(100),
 	[ImageId]					UNIQUEIDENTIFIER,
+	[Size]						INT					NOT NULL,
 	[PageId]					UNIQUEIDENTIFIER
 );
 
@@ -279,7 +281,8 @@ CREATE TABLE [dbo].[Page] (
 	[PageTitle]					VARCHAR(50)	,
 	[Url]						VARCHAR(100)	,
 	[AvailableOnDashboard]		BIT	,
-	[ImageId]					UNIQUEIDENTIFIER
+	[ImageId]					UNIQUEIDENTIFIER,
+	[Size]						INT					NOT NULL
 );
 
 
