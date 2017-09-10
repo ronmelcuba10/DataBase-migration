@@ -381,7 +381,7 @@ CREATE TABLE [dbo].[RoleType] (
 	[Name]						VARCHAR(50)			NOT NULL,
 );
 
-CREATE TABLE [dbo].[Role] (
+CREATE TABLE [dbo].[RoleCompany] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[CompanyId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -391,14 +391,14 @@ CREATE TABLE [dbo].[Role] (
 
 CREATE TABLE [dbo].[RoleObjectScope] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
-	[RoleId]					UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ObjectId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ScopeId]					UNIQUEIDENTIFIER,
 );
 
 
 CREATE TABLE [dbo].[RolePermissionScopeEntity] (
-	[RoleId]					UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]					UNIQUEIDENTIFIER	NOT NULL,
 	[PermissionId]				UNIQUEIDENTIFIER	NOT NULL,
 	[ScopeId]					UNIQUEIDENTIFIER	NOT NULL,
 	[EntityId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -459,7 +459,7 @@ CREATE TABLE [dbo].[UserHistory] (
 
 CREATE TABLE [dbo].[UserRole] (
 	[UserId]					UNIQUEIDENTIFIER	NOT NULL,
-	[RoleId]					UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]				UNIQUEIDENTIFIER	NOT NULL,
 );
 
 

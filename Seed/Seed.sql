@@ -11,6 +11,9 @@
 -- Address *********************************************************************************************************************
 :r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedAddress.sql
 
+-- RoleType  *********************************************************************************************************************
+:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedRoleType.sql
+
 -- DCLINC Company  *********************************************************************************************************************
 :r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedCompany.sql
 
@@ -19,9 +22,6 @@
 
 -- Scope  *********************************************************************************************************************
 :r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedScope.sql
-
--- RoleType  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedRoleType.sql
 
 -- Configuration  *********************************************************************************************************************
 :r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedConfiguration.sql
@@ -43,6 +43,9 @@
 
 -- Monitor Status  ****************************************************************************************************************************
 :r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedMonitorStatus.sql
+
+-- Role Company  ****************************************************************************************************************************
+:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedRoleCompany.sql
 
 
 

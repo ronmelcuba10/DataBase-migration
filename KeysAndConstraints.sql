@@ -158,7 +158,7 @@ ALTER TABLE [dbo].[Phone]
 ALTER TABLE [dbo].[RoleType]
 	ADD CONSTRAINT PK_RoleType PRIMARY KEY (Id)
 
-ALTER TABLE [dbo].[Role]
+ALTER TABLE [dbo].[RoleCompany]
 	ADD CONSTRAINT PK_Role			PRIMARY KEY (Id),
 		CONSTRAINT FK_Role_Company	FOREIGN KEY (CompanyId)	REFERENCES [dbo].[Company]	(Id),
 		CONSTRAINT FK_Role_Type		FOREIGN KEY (TypeId)	REFERENCES [dbo].[RoleType]	(Id)
@@ -168,14 +168,14 @@ ALTER TABLE [dbo].[Scope]
 
 ALTER TABLE [dbo].[RoleObjectScope]
 	ADD CONSTRAINT PK_RoleObjectScope			PRIMARY KEY (Id),
-		CONSTRAINT FK_RoleObjectScope_Role		FOREIGN KEY (RoleId)	REFERENCES [dbo].[Role]	(Id),
+		CONSTRAINT FK_RoleObjectScope_Role		FOREIGN KEY (RoleCompanyId)	REFERENCES [dbo].[RoleCompany]	(Id),
 		CONSTRAINT FK_RoleObjectScope_Scope		FOREIGN KEY (ScopeId)	REFERENCES [dbo].[Scope]	(Id)
 
 ALTER TABLE [dbo].[RolePermissionScopeEntity]
-	ADD CONSTRAINT PK_RolePermissionScopeEntity				PRIMARY KEY (EntityId, PermissionId, RoleId, ScopeId),
+	ADD CONSTRAINT PK_RolePermissionScopeEntity				PRIMARY KEY (EntityId, PermissionId, RoleCompanyId, ScopeId),
 		CONSTRAINT FK_RolePermissionScopeEntity_Entity		FOREIGN KEY (EntityId)	REFERENCES [dbo].[Entity]	(Id),
 		CONSTRAINT FK_RolePermissionScopeEntity_Permission	FOREIGN KEY (PermissionId)	REFERENCES [dbo].[Permission]	(Id),
-		CONSTRAINT FK_RolePermissionScopeEntity_Role		FOREIGN KEY (RoleId)	REFERENCES [dbo].[Role]	(Id),
+		CONSTRAINT FK_RolePermissionScopeEntity_Role		FOREIGN KEY (RoleCompanyId)	REFERENCES [dbo].[RoleCompany]	(Id),
 		CONSTRAINT FK_RolePermissionScopeEntity_Scope		FOREIGN KEY (ScopeId)	REFERENCES [dbo].[Scope]	(Id)
 
 ALTER TABLE [dbo].[UserDashBoardItem]
@@ -187,8 +187,8 @@ ALTER TABLE [dbo].[UserHistory]
 		CONSTRAINT FK_UserHistory_User	FOREIGN KEY (UserId)	REFERENCES [dbo].[User]	(Id)
 
 ALTER TABLE [dbo].[UserRole]
-	ADD CONSTRAINT PK_UserRole		PRIMARY KEY (RoleId, UserId),
-		CONSTRAINT FK_UserRole_Role	FOREIGN KEY (RoleId)	REFERENCES [dbo].[Role]	(Id),
+	ADD CONSTRAINT PK_UserRole		PRIMARY KEY (RoleCompanyId, UserId),
+		CONSTRAINT FK_UserRole_Role	FOREIGN KEY (RoleCompanyId)	REFERENCES [dbo].[RoleCompany]	(Id),
 		CONSTRAINT FK_UserRole_User	FOREIGN KEY (UserId)	REFERENCES [dbo].[User]	(Id)
 
 ALTER TABLE [dbo].[UserSetting]
