@@ -9,7 +9,7 @@ IF NOT EXISTS (SELECT [Id] FROM [dbo].[RoleCompany])
 
 		-- IDs and names are used in the RoleCompany table
 		-- Every company starts with the roles: 'SystemAdministrators' and 'Everyone'
-		INSERT INTO [RoleCompany]([Id], [Name], [CompanyId], [TypeId]) VALUES(NEWID(), @SystemAdministrators,	@CompanyId, @SystemAdministratorRoleId)
-		INSERT INTO [RoleCompany]([Id], [Name], [CompanyId], [TypeId]) VALUES(NEWID(), @Everyone,				@CompanyId, @EveryoneId)
+		INSERT INTO [RoleCompany]([Id], [Name], [CompanyId], [RoleTypeId]) VALUES(NEWID(), @SystemAdministrators,	@CompanyId, @SystemAdministratorRoleId)
+		INSERT INTO [RoleCompany]([Id], [Name], [CompanyId], [RoleTypeId]) VALUES(NEWID(), @Everyone,				@CompanyId, @EveryoneId)
 	END
 

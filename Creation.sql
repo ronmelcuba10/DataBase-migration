@@ -231,7 +231,7 @@ CREATE TABLE [dbo].[MenuItem] (
 	[Index]						INT					NOT NULL,
 	[ToolTip]					VARCHAR(100),
 	[ImageId]					UNIQUEIDENTIFIER,
-	[Size]						INT					NOT NULL,
+	[Size]						INT,
 	[PageId]					UNIQUEIDENTIFIER
 );
 
@@ -309,7 +309,7 @@ CREATE TABLE [dbo].[Person] (
 	[FirstName]					VARCHAR(50),
 	[LastName]					VARCHAR(50),
 	[MiddleName]				VARCHAR(50),
-	[Prifix]					VARCHAR(50),
+	[Prefix]					VARCHAR(50),
 	[Suffix]					VARCHAR(50),
 	[Email]						VARCHAR(250),
 	[AddressId]					UNIQUEIDENTIFIER,
@@ -388,7 +388,7 @@ CREATE TABLE [dbo].[RoleCompany] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[CompanyId]					UNIQUEIDENTIFIER	NOT NULL,
-	[TypeId]						UNIQUEIDENTIFIER	NOT NULL,
+	[RoleTypeId]						UNIQUEIDENTIFIER	NOT NULL,
 );
 
 

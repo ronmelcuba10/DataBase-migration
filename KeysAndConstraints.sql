@@ -161,7 +161,7 @@ ALTER TABLE [dbo].[RoleType]
 ALTER TABLE [dbo].[RoleCompany]
 	ADD CONSTRAINT PK_Role			PRIMARY KEY (Id),
 		CONSTRAINT FK_Role_Company	FOREIGN KEY (CompanyId)	REFERENCES [dbo].[Company]	(Id),
-		CONSTRAINT FK_Role_Type		FOREIGN KEY (TypeId)	REFERENCES [dbo].[RoleType]	(Id)
+		CONSTRAINT FK_Role_RoleType	FOREIGN KEY (RoleTypeId)REFERENCES [dbo].[RoleType]	(Id)
 
 ALTER TABLE [dbo].[Scope]
 	ADD CONSTRAINT PK_Scope			PRIMARY KEY (Id)
