@@ -11,7 +11,6 @@ CREATE TABLE [dbo].[Address] (
 	[CountryId]					UNIQUEIDENTIFIER
 );
 
-
 CREATE TABLE [dbo].[Brand] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
@@ -23,13 +22,19 @@ CREATE TABLE [dbo].[Brand] (
 	[IsDefault]					BIT
 );
 
+CREATE TABLE [dbo].[BrandRoleScope] (
+	[Id]						UNIQUEIDENTIFIER	NOT NULL,
+	[BrandId]					UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]				UNIQUEIDENTIFIER	NOT NULL,
+	[ScopeId]					UNIQUEIDENTIFIER 	NOT NULL
+);
+
 
 CREATE TABLE [dbo].[BrandUrl] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[BrandId]					UNIQUEIDENTIFIER	NOT NULL,
 	[Url]						VARCHAR(100)		NOT NULL,
 );
-
 
 CREATE TABLE [dbo].[Button] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -38,7 +43,6 @@ CREATE TABLE [dbo].[Button] (
 	[Size]						INT					NOT NULL,
 	[IsHome]					BIT					NOT NULL
 );
-
 
 CREATE TABLE [dbo].[Company] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -55,12 +59,10 @@ CREATE TABLE [dbo].[Company] (
 	[Enabled]					BIT					NOT NULL
 );
 
-
 CREATE TABLE [dbo].[CompanyType] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Type]						VARCHAR(50)			NOT NULL,
 );
-
 
 CREATE TABLE [dbo].[Configuration] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -69,7 +71,6 @@ CREATE TABLE [dbo].[Configuration] (
 	[StringValue]				VARCHAR(50),
 );
 
-
 CREATE TABLE [dbo].[Country] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
@@ -77,13 +78,11 @@ CREATE TABLE [dbo].[Country] (
 	[Order]						INT	IDENTITY(1,1)	NOT NULL,
 );
 
-
 CREATE TABLE [dbo].[DateFormat] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(10)			NOT NULL,
 	[IsDefault]					BIT,
 );
-
 
 CREATE TABLE [dbo].[Device] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -94,18 +93,15 @@ CREATE TABLE [dbo].[Device] (
 	[Tx]						INT
 );
 
-
 CREATE TABLE [dbo].[DeviceSharedToCompany] (
 	[DeviceId]					UNIQUEIDENTIFIER	NOT NULL,
 	[CompanyId]					UNIQUEIDENTIFIER	NOT NULL,
 );
 
-
 CREATE TABLE [dbo].[Entity] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 );
-
 
 CREATE TABLE [dbo].[Event] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -122,9 +118,9 @@ CREATE TABLE [dbo].[Event] (
 	[CreatedOn]					DATETIME			NOT NULL,
 	[VideoProfileId]			UNIQUEIDENTIFIER	NOT NULL,
 	[ParentId]					UNIQUEIDENTIFIER,
-	[PleClientStreamConfigId]	UNIQUEIDENTIFIER,
-	[PleServerStreamId]			UNIQUEIDENTIFIER,
-	[PleServerConfigId]			UNIQUEIDENTIFIER,
+	[PLEClientStreamConfigId]	UNIQUEIDENTIFIER,
+	[PLEServerStreamId]			UNIQUEIDENTIFIER,
+	[PLEServerConfigId]			UNIQUEIDENTIFIER,
 	[InputStreamId]				UNIQUEIDENTIFIER,
 	[OutputStreamId]			UNIQUEIDENTIFIER,
 	[SourceAcknowledgement]		INT					NOT NULL,
@@ -139,13 +135,10 @@ CREATE TABLE [dbo].[Event] (
 	[Rx]						INT					NOT NULL
 );
 
-
-
 CREATE TABLE [dbo].[EventAction] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 );
-
 
 CREATE TABLE [dbo].[EventHistory] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -163,12 +156,20 @@ CREATE TABLE [dbo].[EventHistory] (
 	[AudioChannels]				VARCHAR(50)			NOT NULL
 );
 
-
 CREATE TABLE [dbo].[Grid] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[Tag]						VARCHAR(50)			NOT NULL,
 	[PageId]					UNIQUEIDENTIFIER	NOT NULL
+);
+
+CREATE TABLE [dbo].[GridButton] (
+	[Id]						UNIQUEIDENTIFIER	NOT NULL,
+	[ButtonId]					UNIQUEIDENTIFIER	NOT NULL,
+	[Index]						INT					NOT NULL,
+	[ToolTip]					VARCHAR(100),
+	[RedirectPageId]			UNIQUEIDENTIFIER,
+	[ForGridUse]				BIT					NOT NULL,	
 );
 
 CREATE TABLE [dbo].[Host] (
@@ -187,7 +188,6 @@ CREATE TABLE [dbo].[Host] (
 	[LastCheckin]				DATETIME
 );
 
-
 CREATE TABLE [dbo].[HostHistory] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
@@ -196,13 +196,11 @@ CREATE TABLE [dbo].[HostHistory] (
 	[ModifiedOn]				DATETIME			NOT NULL,
 );
 
-
 CREATE TABLE [dbo].[Image] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[Url]						VARCHAR(100)		NOT NULL
 );
-
 
 CREATE TABLE [dbo].[InputStream] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -235,12 +233,17 @@ CREATE TABLE [dbo].[MenuItem] (
 	[PageId]					UNIQUEIDENTIFIER
 );
 
+CREATE TABLE [dbo].[MenuItemRoleScope] (
+	[Id]						UNIQUEIDENTIFIER	NOT NULL,
+	[MenuItemId]				UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]				UNIQUEIDENTIFIER	NOT NULL,
+	[ScopeId]					UNIQUEIDENTIFIER 	NOT NULL
+);
 
 CREATE TABLE [dbo].[MonitorStatus] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(32)			NOT NULL,
 );
-
 
 CREATE TABLE [dbo].[OutputStream] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -273,18 +276,23 @@ CREATE TABLE [dbo].[OutputStream] (
 	[Deleted]					BIT					NOT NULL
 );
 
-
 CREATE TABLE [dbo].[Page] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
-	[BrowserTitle]				VARCHAR(50)	,
-	[PageTitle]					VARCHAR(50)	,
-	[Url]						VARCHAR(100)	,
-	[AvailableOnDashboard]		BIT	,
+	[BrowserTitle]				VARCHAR(50),
+	[PageTitle]					VARCHAR(50),
+	[Url]						VARCHAR(100),
+	[AvailableOnDashboard]		BIT,
 	[ImageId]					UNIQUEIDENTIFIER,
 	[Size]						INT					NOT NULL
 );
 
+CREATE TABLE [dbo].[PageRoleScope] (
+	[Id]						UNIQUEIDENTIFIER	NOT NULL,
+	[PageId]					UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]				UNIQUEIDENTIFIER	NOT NULL,
+	[ScopeId]					UNIQUEIDENTIFIER 	NOT NULL
+);
 
 CREATE TABLE [dbo].[PageButton] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -296,13 +304,18 @@ CREATE TABLE [dbo].[PageButton] (
 	[ForGridUse]				BIT					NOT NULL,	
 );
 
+CREATE TABLE [dbo].[PageButtonRoleScope] (
+	[Id]						UNIQUEIDENTIFIER	NOT NULL,
+	[PageButtonId]				UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]				UNIQUEIDENTIFIER	NOT NULL,
+	[ScopeId]					UNIQUEIDENTIFIER 	NOT NULL
+);
 
 CREATE TABLE [dbo].[Permission] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[ObjectiveId]				UNIQUEIDENTIFIER,
 );
-
 
 CREATE TABLE [dbo].[Person] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -315,7 +328,6 @@ CREATE TABLE [dbo].[Person] (
 	[AddressId]					UNIQUEIDENTIFIER,
 );
 
-
 CREATE TABLE [dbo].[Phone] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[CountryId]					UNIQUEIDENTIFIER,
@@ -327,8 +339,7 @@ CREATE TABLE [dbo].[Phone] (
 	[CompanyId]					UNIQUEIDENTIFIER,
 );
 
-
-CREATE TABLE [dbo].[PleClientStreamConfig] (
+CREATE TABLE [dbo].[PLEClientStreamConfig] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ConfigFileName]			VARCHAR(100)		NOT NULL,
@@ -346,7 +357,7 @@ CREATE TABLE [dbo].[PleClientStreamConfig] (
 	[Deleted]					BIT					NOT NULL,
 );
 
-CREATE TABLE [dbo].[PleServerConfig] (
+CREATE TABLE [dbo].[PLEServerConfig] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ConfigFileName]			VARCHAR(100)		NOT NULL,
@@ -359,25 +370,22 @@ CREATE TABLE [dbo].[PleServerConfig] (
 	[Deleted]					BIT					NOT NULL,
 );
 
-
-
-CREATE TABLE [dbo].[PleServerStream] (
+CREATE TABLE [dbo].[PLEServerStream] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[HostId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ConfigFileName]			VARCHAR(100)		NOT NULL,
 	[StreamName]				VARCHAR(40)			NOT NULL,
-	[PleServerIndex]			VARCHAR(8),
+	[PLEServerIndex]			VARCHAR(8),
 	[StreamEnabled]				BIT					NOT NULL,
 	[DestinationIP]				VARCHAR(16),
 	[DestinationPort]			INT,
-	[ModifiedOn]					DATETIME,
+	[ModifiedOn]				DATETIME,
 	[OutputMulticast]			BIT,
 	[OutputMulticastIP]			VARCHAR(16),
 	[OutputMulticastIFace]		VARCHAR(16),
 	[MultiIPAddress]			VARCHAR(16),
 	[Deleted]					BIT					NOT NULL,
 );
-
 
 CREATE TABLE [dbo].[RoleType] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -388,33 +396,30 @@ CREATE TABLE [dbo].[RoleCompany] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[CompanyId]					UNIQUEIDENTIFIER	NOT NULL,
-	[RoleTypeId]						UNIQUEIDENTIFIER	NOT NULL,
+	[RoleTypeId]				UNIQUEIDENTIFIER	NOT NULL,
 );
 
-
+-- remove in the future
 CREATE TABLE [dbo].[RoleObjectScope] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
-	[RoleCompanyId]					UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]				UNIQUEIDENTIFIER	NOT NULL,
 	[ObjectId]					UNIQUEIDENTIFIER	NOT NULL,
 	[ScopeId]					UNIQUEIDENTIFIER,
 );
-
+--
 
 CREATE TABLE [dbo].[RolePermissionScopeEntity] (
-	[RoleCompanyId]					UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]				UNIQUEIDENTIFIER	NOT NULL,
 	[PermissionId]				UNIQUEIDENTIFIER	NOT NULL,
 	[ScopeId]					UNIQUEIDENTIFIER	NOT NULL,
 	[EntityId]					UNIQUEIDENTIFIER	NOT NULL,
 );
-
 
 CREATE TABLE [dbo].[Scope] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[Value]						INT					NOT NULL,
 );
-
-
 
 CREATE TABLE [dbo].[State] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -441,15 +446,12 @@ CREATE TABLE [dbo].[User] (
 	[EventNotifications]		BIT					NOT NULL,
 );
 
-
-
-CREATE TABLE [dbo].[UserDashBoardItem] (
+CREATE TABLE [dbo].[UserDashboardPage] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[UserId]					UNIQUEIDENTIFIER	NOT NULL,
-	[ObjectId]					UNIQUEIDENTIFIER	NOT NULL,
+	[PageId]					UNIQUEIDENTIFIER	NOT NULL,
 	[Index]						INT					NOT NULL,
 );
-
 
 CREATE TABLE [dbo].[UserHistory] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
@@ -458,13 +460,10 @@ CREATE TABLE [dbo].[UserHistory] (
 	[LoginIP]					VARCHAR(50),
 );
 
-
-
 CREATE TABLE [dbo].[UserRole] (
 	[UserId]					UNIQUEIDENTIFIER	NOT NULL,
 	[RoleCompanyId]				UNIQUEIDENTIFIER	NOT NULL,
 );
-
 
 CREATE TABLE [dbo].[UserSetting] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,

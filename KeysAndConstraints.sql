@@ -70,16 +70,16 @@ ALTER TABLE [dbo].[OutputStream]
 		CONSTRAINT FK_OutputStream_Host		FOREIGN KEY (HostId)	REFERENCES [dbo].[Host]	(Id)
 
 ALTER TABLE [dbo].[PleClientStreamConfig]
-	ADD CONSTRAINT PK_PleClienStreamConfig		PRIMARY KEY (Id),
-		CONSTRAINT FK_PleClienStreamConfig_Host	FOREIGN KEY (HostId)	REFERENCES [dbo].[Host]	(Id)
+	ADD CONSTRAINT PK_PLEClienStreamConfig		PRIMARY KEY (Id),
+		CONSTRAINT FK_PLEClienStreamConfig_Host	FOREIGN KEY (HostId)	REFERENCES [dbo].[Host]	(Id)
 
-ALTER TABLE [dbo].[PleServerConfig]
-	ADD CONSTRAINT PK_PleServerConfig		PRIMARY KEY (Id),
-		CONSTRAINT FK_PleServerConfig_Host	FOREIGN KEY (HostId)	REFERENCES [dbo].[Host]	(Id)
+ALTER TABLE [dbo].[PLEServerConfig]
+	ADD CONSTRAINT PK_PLEServerConfig		PRIMARY KEY (Id),
+		CONSTRAINT FK_PLEServerConfig_Host	FOREIGN KEY (HostId)	REFERENCES [dbo].[Host]	(Id)
 
-ALTER TABLE [dbo].[PleServerStream]
-	ADD CONSTRAINT PK_PleServerStream		PRIMARY KEY (Id),
-		CONSTRAINT FK_PleServerStream_Host	FOREIGN KEY (HostId)	REFERENCES [dbo].[Host]	(Id)
+ALTER TABLE [dbo].[PLEServerStream]
+	ADD CONSTRAINT PK_PLEServerStream		PRIMARY KEY (Id),
+		CONSTRAINT FK_PLEServerStream_Host	FOREIGN KEY (HostId)	REFERENCES [dbo].[Host]	(Id)
 		
 ALTER TABLE [dbo].[Page]
 	ADD CONSTRAINT PK_Page			PRIMARY KEY (Id),
@@ -107,9 +107,9 @@ ALTER TABLE [dbo].[Event]
 		CONSTRAINT FK_Event_Status					FOREIGN KEY (StatusId)	REFERENCES [dbo].[Status]	(Id),
 		CONSTRAINT FK_Event_InputStream				FOREIGN KEY (InputStreamId)	REFERENCES [dbo].[InputStream]	(Id),
 		CONSTRAINT FK_Event_OutputStream			FOREIGN KEY (OutputStreamId)	REFERENCES [dbo].[OutputStream]	(Id),
-		CONSTRAINT FK_Event_PleClientStreamConfig	FOREIGN KEY (PleClientStreamConfigId)	REFERENCES [dbo].[PleClientStreamConfig]	(Id),
-		CONSTRAINT FK_Event_PleServerConfig			FOREIGN KEY (PleServerConfigId)	REFERENCES [dbo].[PleServerConfig]	(Id),
-		CONSTRAINT FK_Event_PleServerStream			FOREIGN KEY (PleServerStreamId)	REFERENCES [dbo].[PleServerStream]	(Id),
+		CONSTRAINT FK_Event_PLEClientStreamConfig	FOREIGN KEY (PLEClientStreamConfigId)	REFERENCES [dbo].[PLEClientStreamConfig]	(Id),
+		CONSTRAINT FK_Event_PLEServerConfig			FOREIGN KEY (PLEServerConfigId)	REFERENCES [dbo].[PLEServerConfig]	(Id),
+		CONSTRAINT FK_Event_PLEServerStream			FOREIGN KEY (PLEServerStreamId)	REFERENCES [dbo].[PLEServerStream]	(Id),
 		CONSTRAINT FK_Event_Creator					FOREIGN KEY (CreatorId)	REFERENCES [dbo].[User]	(Id),
 		CONSTRAINT FK_Event_Owner					FOREIGN KEY (OwnerId)	REFERENCES [dbo].[User]	(Id),
 		CONSTRAINT FK_Event_VideoProfile			FOREIGN KEY (VideoProfileId)	REFERENCES [dbo].[VideoProfile]	(Id)
@@ -165,12 +165,37 @@ ALTER TABLE [dbo].[RoleCompany]
 
 ALTER TABLE [dbo].[Scope]
 	ADD CONSTRAINT PK_Scope			PRIMARY KEY (Id)
+	
+ALTER TABLE [dbo].[BrandRoleScope]
+	ADD CONSTRAINT PK_BrandRoleScope			PRIMARY KEY (Id),
+		CONSTRAINT FK_BrandRoleScope_Role		FOREIGN KEY (RoleCompanyId)	REFERENCES [dbo].[RoleCompany]	(Id),
+		CONSTRAINT FK_BrandRoleScope_Scope		FOREIGN KEY (ScopeId)		REFERENCES [dbo].[Scope]	(Id),
+		CONSTRAINT FK_BrandRoleScope_MenuItem	FOREIGN KEY (BrandId)		REFERENCES [dbo].[Scope]	(Id)
+	
+ALTER TABLE [dbo].[MenuItemRoleScope]
+	ADD CONSTRAINT PK_MenuItemRoleScope				PRIMARY KEY (Id),
+		CONSTRAINT FK_MenuItemRoleScope_Role		FOREIGN KEY (RoleCompanyId)	REFERENCES [dbo].[RoleCompany]	(Id),
+		CONSTRAINT FK_MenuItemRoleScope_Scope		FOREIGN KEY (ScopeId)		REFERENCES [dbo].[Scope]	(Id),
+		CONSTRAINT FK_MenuItemRoleScope_MenuItem	FOREIGN KEY (MenuItemId)	REFERENCES [dbo].[Scope]	(Id)
+	
+ALTER TABLE [dbo].[PageButtonRoleScope]
+	ADD CONSTRAINT PK_PageButtonRoleScope				PRIMARY KEY (Id),
+		CONSTRAINT FK_PageButtonRoleScope_Role			FOREIGN KEY (RoleCompanyId)	REFERENCES [dbo].[RoleCompany]	(Id),
+		CONSTRAINT FK_PageButtonRoleScope_Scope			FOREIGN KEY (ScopeId)		REFERENCES [dbo].[Scope]	(Id),
+		CONSTRAINT FK_PageButtonRoleScope_PageButton	FOREIGN KEY (PageButtonId)	REFERENCES [dbo].[Scope]	(Id)
 
+ALTER TABLE [dbo].[PageRoleScope]
+	ADD CONSTRAINT PK_PageRoleScope			PRIMARY KEY (Id),
+		CONSTRAINT FK_PageRoleScope_Role	FOREIGN KEY (RoleCompanyId)	REFERENCES [dbo].[RoleCompany]	(Id),
+		CONSTRAINT FK_PageRoleScope_Scope	FOREIGN KEY (ScopeId)		REFERENCES [dbo].[Scope]	(Id),
+		CONSTRAINT FK_PageRoleScope_Page	FOREIGN KEY (PageId)		REFERENCES [dbo].[Scope]	(Id)
+
+-- remove in the future		
 ALTER TABLE [dbo].[RoleObjectScope]
 	ADD CONSTRAINT PK_RoleObjectScope			PRIMARY KEY (Id),
 		CONSTRAINT FK_RoleObjectScope_Role		FOREIGN KEY (RoleCompanyId)	REFERENCES [dbo].[RoleCompany]	(Id),
 		CONSTRAINT FK_RoleObjectScope_Scope		FOREIGN KEY (ScopeId)	REFERENCES [dbo].[Scope]	(Id)
-
+		
 ALTER TABLE [dbo].[RolePermissionScopeEntity]
 	ADD CONSTRAINT PK_RolePermissionScopeEntity				PRIMARY KEY (EntityId, PermissionId, RoleCompanyId, ScopeId),
 		CONSTRAINT FK_RolePermissionScopeEntity_Entity		FOREIGN KEY (EntityId)	REFERENCES [dbo].[Entity]	(Id),
@@ -178,9 +203,10 @@ ALTER TABLE [dbo].[RolePermissionScopeEntity]
 		CONSTRAINT FK_RolePermissionScopeEntity_Role		FOREIGN KEY (RoleCompanyId)	REFERENCES [dbo].[RoleCompany]	(Id),
 		CONSTRAINT FK_RolePermissionScopeEntity_Scope		FOREIGN KEY (ScopeId)	REFERENCES [dbo].[Scope]	(Id)
 
-ALTER TABLE [dbo].[UserDashBoardItem]
-	ADD CONSTRAINT PK_UserDashBoardItem	PRIMARY KEY (Id),
-		CONSTRAINT FK_UserDashBoardItem_User	FOREIGN KEY (UserId)	REFERENCES [dbo].[User]	(Id)
+ALTER TABLE [dbo].[UserDashBoardPage]
+	ADD CONSTRAINT PK_UserDashBoardPage			PRIMARY KEY (Id),
+		CONSTRAINT FK_UserDashBoardPage_User	FOREIGN KEY (UserId)	REFERENCES [dbo].[User]	(Id),
+		CONSTRAINT FK_UserDashBoardPage_Page	FOREIGN KEY (PageId)	REFERENCES [dbo].[Page]	(Id)
 
 ALTER TABLE [dbo].[UserHistory]
 	ADD CONSTRAINT PK_UserHistory	PRIMARY KEY (Id),

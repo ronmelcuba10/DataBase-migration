@@ -47,6 +47,9 @@
 -- Role Company  ****************************************************************************************************************************
 :r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedRoleCompany.sql
 
+-- Video profile  ****************************************************************************************************************************
+--:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedVideoProfile.sql NO need
+
 
 
 /*
