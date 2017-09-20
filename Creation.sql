@@ -171,7 +171,7 @@ CREATE TABLE [dbo].[Grid] (
 CREATE TABLE [dbo].[GridButton] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[ButtonId]					UNIQUEIDENTIFIER	NOT NULL,
-	[GridId]					UNIQUEIDENTIFIER	NOT NULL,
+	[PageId]					UNIQUEIDENTIFIER	NOT NULL,
 	[Index]						INT					NOT NULL,
 	[Size]						INT,
 	[ToolTip]					VARCHAR(100),
