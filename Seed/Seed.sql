@@ -18,7 +18,7 @@
 :r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedCompany.sql
 
 -- Status  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedStatus.sql
+:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedEventStatus.sql
 
 -- Scope  *********************************************************************************************************************
 :r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedScope.sql

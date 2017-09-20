@@ -125,7 +125,7 @@ CREATE TABLE [dbo].[Event] (
 	[OutputStreamId]			UNIQUEIDENTIFIER,
 	[SourceAcknowledgement]		INT					NOT NULL,
 	[DestinationAcknowledgement]INT					NOT NULL,
-	[StatusId]					INT					NOT NULL,
+	[EventStatusId]					INT					NOT NULL,
 	[Vbitrate]					VARCHAR(50)			NOT NULL,
 	[Audiochannels]				VARCHAR(50)			NOT NULL,
 	[ClosedCaption]				BIT					NOT NULL,
@@ -156,6 +156,11 @@ CREATE TABLE [dbo].[EventHistory] (
 	[AudioChannels]				VARCHAR(50)			NOT NULL
 );
 
+CREATE TABLE [dbo].[EventStatus] (
+	[Id]						INT	IDENTITY(1,1)	NOT NULL,
+	[Name]						VARCHAR(50)			NOT NULL,
+);
+
 CREATE TABLE [dbo].[Grid] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[Name]						VARCHAR(50)			NOT NULL,
@@ -166,10 +171,18 @@ CREATE TABLE [dbo].[Grid] (
 CREATE TABLE [dbo].[GridButton] (
 	[Id]						UNIQUEIDENTIFIER	NOT NULL,
 	[ButtonId]					UNIQUEIDENTIFIER	NOT NULL,
+	[GridId]					UNIQUEIDENTIFIER	NOT NULL,
 	[Index]						INT					NOT NULL,
+	[Size]						INT,
 	[ToolTip]					VARCHAR(100),
 	[RedirectPageId]			UNIQUEIDENTIFIER,
-	[ForGridUse]				BIT					NOT NULL,	
+);
+
+CREATE TABLE [dbo].[GridButtonRoleScope] (
+	[Id]						UNIQUEIDENTIFIER	NOT NULL,
+	[GridButtonId]				UNIQUEIDENTIFIER	NOT NULL,
+	[RoleCompanyId]				UNIQUEIDENTIFIER	NOT NULL,
+	[ScopeId]					UNIQUEIDENTIFIER 	NOT NULL
 );
 
 CREATE TABLE [dbo].[Host] (
@@ -300,8 +313,8 @@ CREATE TABLE [dbo].[PageButton] (
 	[ButtonId]					UNIQUEIDENTIFIER	NOT NULL,
 	[Index]						INT					NOT NULL,
 	[ToolTip]					VARCHAR(100),
+	[Size]						INT,
 	[RedirectPageId]			UNIQUEIDENTIFIER,
-	[ForGridUse]				BIT					NOT NULL,	
 );
 
 CREATE TABLE [dbo].[PageButtonRoleScope] (
@@ -426,11 +439,6 @@ CREATE TABLE [dbo].[State] (
 	[CountryId]					UNIQUEIDENTIFIER,
 	[Name]						VARCHAR(50)			NOT NULL,
 	[PostalCode]				VARCHAR(5),
-);
-
-CREATE TABLE [dbo].[Status] (
-	[Id]						INT	IDENTITY(1,1)	NOT NULL,
-	[Name]						VARCHAR(50)			NOT NULL,
 );
 
 CREATE TABLE [dbo].[User] (

@@ -58,8 +58,8 @@ ALTER TABLE [dbo].[DeviceSharedToCompany]
 ALTER TABLE [dbo].[Entity]
 	ADD CONSTRAINT PK_Entity PRIMARY KEY (Id)
 	
-ALTER TABLE [dbo].[Status]
-	ADD CONSTRAINT PK_Status PRIMARY KEY (Id)
+ALTER TABLE [dbo].[EventStatus]
+	ADD CONSTRAINT PK_EventStatus PRIMARY KEY (Id)
 	
 ALTER TABLE [dbo].[InputStream]
 	ADD CONSTRAINT PK_InputStream		PRIMARY KEY (Id),
@@ -104,7 +104,7 @@ ALTER TABLE [dbo].[Event]
 		CONSTRAINT FK_Event_Company					FOREIGN KEY (CompanyId)	REFERENCES [dbo].[Company]	(Id),
 		CONSTRAINT FK_Event_SourceDevice			FOREIGN KEY (SourceDeviceId)	REFERENCES [dbo].[Device]	(Id),
 		CONSTRAINT FK_Event_DestinationDevice		FOREIGN KEY (DestinationDeviceId)	REFERENCES [dbo].[Device]	(Id),
-		CONSTRAINT FK_Event_Status					FOREIGN KEY (StatusId)	REFERENCES [dbo].[Status]	(Id),
+		CONSTRAINT FK_Event_EventStatus				FOREIGN KEY (EventStatusId)	REFERENCES [dbo].[EventStatus]	(Id),
 		CONSTRAINT FK_Event_InputStream				FOREIGN KEY (InputStreamId)	REFERENCES [dbo].[InputStream]	(Id),
 		CONSTRAINT FK_Event_OutputStream			FOREIGN KEY (OutputStreamId)	REFERENCES [dbo].[OutputStream]	(Id),
 		CONSTRAINT FK_Event_PLEClientStreamConfig	FOREIGN KEY (PLEClientStreamConfigId)	REFERENCES [dbo].[PLEClientStreamConfig]	(Id),

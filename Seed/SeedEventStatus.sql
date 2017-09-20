@@ -1,5 +1,5 @@
-IF NOT EXISTS (SELECT * FROM [dbo].[Status])
-	INSERT INTO [dbo].[Status]
+IF NOT EXISTS (SELECT * FROM [dbo].[EventStatus])
+	INSERT INTO [dbo].[EventStatus]
            ([Name])
      VALUES
 			('All'),
