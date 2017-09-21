@@ -1286,7 +1286,7 @@ CREATE PROCEDURE [dbo].[MenuItems_InsertUpdate]
 	@PageId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @RootId UNIQUEIDENTIFIER= (SELECT [Id] FROM [dbo].[MenuItem] WHERE [Name] = 'Root'
+	DECLARE @RootId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[MenuItem] WHERE [Name] = 'Root')
 	IF @ParentId IS NOT NULL AND @ParentId NOT IN (SELECT [Id] FROM [dbo].[MenuItem] WHERE ParentId IS NULL OR ParentId=@RootId)
 		SELECT 2 AS Successful	-- Invalid ParentId
 	ELSE IF @ImageId IS NOT NULL AND @ImageId NOT IN (SELECT [Id] FROM Image)
@@ -1583,11 +1583,11 @@ BEGIN
 		BEGIN
 			BEGIN TRY
 				BEGIN TRANSACTION
-					DECLARE @PrevId UNIQUEIDENTIFIER = SELECT [Id] 
+					DECLARE @PrevId UNIQUEIDENTIFIER=(SELECT [Id] 
 														FROM [dbo].[PageButton] 
 														WHERE [PageId]=@PageId 
 															AND [ForGridUse]=@ForGridUse 
-															AND [Index]=@Index-1
+															AND [Index]=@Index-1)
 					UPDATE [dbo].[PageButton] SET [Index]=@MaxIndexPlusOne WHERE [Id]=@Id
 					UPDATE [dbo].[PageButton] SET [Index]=[Index]+1 WHERE [Id]=@PrevId
 					UPDATE [dbo].[PageButton] SET [Index]=@Index-1 WHERE [Id]=@Id
@@ -1636,7 +1636,7 @@ CREATE PROCEDURE [dbo].[PageButton_Insert]
 	@PageId UNIQUEIDENTIFIER,
 	@ButtonId UNIQUEIDENTIFIER,
 	@ToolTip VARCHAR(50),
-	@RedirectPageId UNIQUEIDENTIFIER=NULL,
+	@RedirectPageId UNIQUEIDENTIFIER = NULL
 AS
 BEGIN
 	IF @PageId IS NULL OR @PageId NOT IN (SELECT [Id] FROM [dbo].[Page])
@@ -1715,11 +1715,11 @@ CREATE PROCEDURE [dbo].[Scope_GetListByUserIdGridButtonId]
 	@GridButtonId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageUrl VARCHAR(100) = SELECT [Url] 
+	DECLARE @PageUrl VARCHAR(100) = (SELECT [Url] 
 										FROM [dbo].[Page] 
 										WHERE [Id]=(SELECT [PageId] 
 													FROM [dbo].[GridButton] 
-													WHERE Id=@GridButtonId)
+													WHERE [Id]=@GridButtonId))
 	SELECT 
 		[Id],
 		[Name],
@@ -1993,7 +1993,7 @@ CREATE PROCEDURE [dbo].[InputStream_DeleteByHostIdConfigFileName]
 	@ConfigFileName VARCHAR(100)
 AS
 BEGIN
-	DECLARE @Id UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[InputStream] WHERE [HostId]=@HostId AND [ConfigFileName]=@ConfigFileName
+	DECLARE @Id UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[InputStream] WHERE [HostId]=@HostId AND [ConfigFileName]=@ConfigFileName)
 	IF @Id IS NOT NULL
 	BEGIN
 		IF EXISTS(SELECT [Id] FROM [dbo].[Event] WHERE [InputStreamId]=@Id)
@@ -2240,7 +2240,7 @@ BEGIN
 			[CompanyId],
 			[Registered],
 			[PageId],
-			[DateFormatId],
+			[DateFormatId]
 		FROM [dbo].[User]
 		WHERE Id IN (SELECT [UserId] FROM [dbo].[UserRole] WHERE [RoleCompanyId]=@RoleCompanyId)
 			AND [CompanyId]=(SELECT [CompanyId]	FROM [dbo].[RoleCompany] WHERE [Id]=@RoleCompanyId)
@@ -2254,7 +2254,7 @@ BEGIN
 			[CompanyId],
 			[Registered],
 			[PageId],
-			[DateFormatId],
+			[DateFormatId]
 		FROM [dbo].[User]
 		WHERE [Id] NOT IN (SELECT [UserId] FROM [dbo].[UserRole] WHERE [RoleCompanyId]=@RoleCompanyId)
 			AND [CompanyId]=(SELECT [CompanyId] FROM [dbo].[RoleCompany] WHERE [Id]=@RoleCompanyId)
@@ -2280,7 +2280,7 @@ BEGIN
 				BEGIN
 					BEGIN TRY
 						BEGIN TRANSACTION
-							DECLARE @PersonId UNIQUEIDENTIFIER = SELECT [PersonId] FROM [dbo].[User] WHERE [Id]=@Id
+							DECLARE @PersonId UNIQUEIDENTIFIER = (SELECT [PersonId] FROM [dbo].[User] WHERE [Id]=@Id)
 							DELETE [dbo].[UserRole] WHERE [UserId]=@Id
 							DELETE [dbo].[UserSetting] WHERE [UserId]=@Id
 							DELETE [dbo].[UserDashboardItem] WHERE [UserId]=@Id
@@ -2577,8 +2577,8 @@ BEGIN
 		[Page].Url AS NavigateURL,
 		[Page].[Name],
 		[dbo].[Image].Url AS ImageUrl,
-		(SELECT MIN([MinDashboardItem].[Index])	FROM [UserDashboardItem] [MinDashboardItem]	WHERE [MinDashboardItem].[UserId] = [UserDashboardItem].[UserId]) AS [MinIndex]
-		(SELECT MAX([MinDashboardItem].[Index])	FROM [UserDashboardItem] [MinDashboardItem]	WHERE [MinDashboardItem].UserId = [UserDashboardItem].UserId) AS [MaxIndex]
+		(SELECT MIN([MinDashboardItem].[Index])	FROM [UserDashboardItem] [MinDashboardItem]	WHERE [MinDashboardItem].[UserId] = [UserDashboardItem].[UserId]) AS MinIndex,
+		(SELECT MAX([MinDashboardItem].[Index])	FROM [UserDashboardItem] [MinDashboardItem]	WHERE [MinDashboardItem].UserId = [UserDashboardItem].UserId) AS MaxIndex
 	FROM [dbo].[UserDashboardItem]
 	LEFT JOIN [dbo].[Page] 
 		INNER JOIN [dbo].[Image] 
@@ -2630,10 +2630,10 @@ CREATE PROCEDURE [dbo].[Scope_ReadByUserIdPageNameButtonName]
 	@ButtonName VARCHAR(50)
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Page] WHERE [Url]=@PageName
-	DECLARE @GridID UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Grid] WHERE [PageId] = @PageId
-	DECLARE @ButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]=@ButtonName
-	DECLARE @GridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]= @ButtonId 
+	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]=@PageName)
+	DECLARE @GridID UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Grid] WHERE [PageId] = @PageId)
+	DECLARE @ButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]=@ButtonName)
+	DECLARE @GridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]= @ButtonId)
 
 	SELECT dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridButtonId) AS ButtonScope
 END
@@ -2647,15 +2647,15 @@ CREATE PROCEDURE [dbo].[UserPerson_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Users.aspx'
-	DECLARE @GridID UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Grid] WHERE [PageId] = @PageId
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit'
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Delete'
-	DECLARE @RolesButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Roles'
+	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Users.aspx')
+	DECLARE @GridID UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Grid] WHERE [PageId] = @PageId)
+	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
+	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Delete')
+	DECLARE @RolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Roles')
 	
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@EditButtonId 
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@DeleteButtonId 
-	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@RolesButtonId 
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@EditButtonId) 
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@DeleteButtonId) 
+	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@RolesButtonId) 
 
 	SELECT 
 		[User].[Id],
@@ -2673,7 +2673,7 @@ BEGIN
 		[dbo].[View_Person_FullName_Email].[Number],
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) AS EditButton,
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteGridButtonId) AS DeleteButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @RolesGridButtonId) AS RolesButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @RolesGridButtonId) AS RolesButton
 	FROM [dbo].[User]
 	INNER JOIN [dbo].[View_Person_FullName_Email] 
 		ON [View_Person_FullName_Email].[Id]=[dbo].[User].[PersonId]
@@ -2692,14 +2692,14 @@ CREATE PROCEDURE [dbo].[SConfiguration_GetListByUserId]
 AS
 BEGIN
 	
-	DECLARE @SConfigPageId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Page] WHERE [Url]='SystemSettings.aspx'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit'
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Delete'
-	DECLARE @RolesButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Roles'
+	DECLARE @SConfigPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='SystemSettings.aspx')
+	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
+	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Delete')
+	DECLARE @RolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Roles')
 	
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@EditButtonId 
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@DeleteButtonId 
-	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@RolesButtonId 
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@EditButtonId) 
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@DeleteButtonId) 
+	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@RolesButtonId) 
 
 	SELECT 
 		[Id],
@@ -2723,13 +2723,13 @@ CREATE PROCEDURE [dbo].[Role_GetListByGridButtonIdUserId]
 	@GridButtonId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @GridButtonRolesPageId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Page] WHERE [Url]='GridButtonRoles.aspx'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit'
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Delete'
-	DECLARE @RolesButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Roles'
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@GridButtonRolesPageId AND [ButtonId]=@EditButtonId 
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@GridButtonRolesPageId AND [ButtonId]=@DeleteButtonId 
-	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@GridButtonRolesPageId AND [ButtonId]=@RolesButtonId 
+	DECLARE @GridButtonRolesPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='GridButtonRoles.aspx')
+	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
+	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Delete')
+	DECLARE @RolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Roles')
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@GridButtonRolesPageId AND [ButtonId]=@EditButtonId)
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@GridButtonRolesPageId AND [ButtonId]=@DeleteButtonId) 
+	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@GridButtonRolesPageId AND [ButtonId]=@RolesButtonId) 
 	
 	SELECT 
 		[Id], 
@@ -2772,29 +2772,29 @@ CREATE PROCEDURE [dbo].[GridButton_GetListByPageIdUserId]
 AS
 BEGIN
 	-- the button's page
-	DECLARE @ButtonPageId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Page] WHERE [Url]='PageButtons.aspx'
+	DECLARE @ButtonPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='PageButtons.aspx')
 	-- buttons
-	DECLARE @AddButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Add'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button]	WHERE [Name]='Edit'
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button]	WHERE [Name]='Delete'
-	DECLARE @PageButtonRolesButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='PageButtonRoles'
-	DECLARE @MoveDownButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Move Down'
-	DECLARE @MoveUpButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Move Up'
-	DECLARE @NewGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='NewGridButton'
-	DECLARE @GridEditButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='GridEdit'
-	DECLARE @GridDeleteButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='GridDelete'
-	DECLARE @GridButtonRolesButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Grid Button Roles'
+	DECLARE @AddButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Add')
+	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button]	WHERE [Name]='Edit')
+	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button]	WHERE [Name]='Delete')
+	DECLARE @PageButtonRolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='PageButtonRoles')
+	DECLARE @MoveDownButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Move Down')
+	DECLARE @MoveUpButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Move Up')
+	DECLARE @NewGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='NewGridButton')
+	DECLARE @GridEditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='GridEdit')
+	DECLARE @GridDeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='GridDelete')
+	DECLARE @GridButtonRolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Grid Button Roles')
 	-- grid buttons
-	DECLARE @AddGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton]	WHERE [PageId]=@ButonPageId AND [ButtonId]=@AddButtonId
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@EditButtonId
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@DeleteButtonId
-	DECLARE @PageButtonRolesButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@PageButtonRolesButtonId
-	DECLARE @MoveDownGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@MoveDownButtonId
-	DECLARE @MoveUpGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@MoveUpButtonId
-	DECLARE @NewGrigGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@NewGridButtonId
-	DECLARE @GridEditGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@GridEditButtonId
-	DECLARE @GridDeleteGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@GridDeleteButtonId
-	DECLARE @GridButtonRolesGridButtonId UNIQUEIDENTIFIER = SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@GridButtonRolesButtonId
+	DECLARE @AddGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton]	WHERE [PageId]=@ButonPageId AND [ButtonId]=@AddButtonId)
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@EditButtonId)
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@DeleteButtonId)
+	DECLARE @PageButtonRolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@PageButtonRolesButtonId)
+	DECLARE @MoveDownGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@MoveDownButtonId)
+	DECLARE @MoveUpGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@MoveUpButtonId)
+	DECLARE @NewGrigGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@NewGridButtonId)
+	DECLARE @GridEditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@GridEditButtonId)
+	DECLARE @GridDeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@GridDeleteButtonId)
+	DECLARE @GridButtonRolesGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@GridButtonRolesButtonId)
 	
 
 	SELECT
@@ -2822,7 +2822,7 @@ BEGIN
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridNewGridButtonId) 		AS NewGridButton,
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridEditButtonId) 			AS GridEditButton,
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridDeleteButtonId) 		AS GridDeleteButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridButtonRolesButtonId) 	AS GridButtonRolesButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridButtonRolesButtonId) 	AS GridButtonRolesButton
 	FROM [dbo].[GridButton]
 	WHERE ([Id] IN (SELECT [GridButtonId] 
 						FROM [dbo].[GridButtonRoleScope]
@@ -3423,63 +3423,55 @@ AS
 BEGIN
 	IF @StartNow = 1
 		SET @StartTime = GETDATE()
-	DECLARE @CancelledId INT = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Cancelled')
-	IF EXISTS
-	(
-		SELECT [Name]
-	FROM [Event]
-	WHERE (PLEClientStreamConfigId=@PLEClientStreamConfigId OR PLEServerConfigId=@PLEServerConfigId) AND [EventStatusId]=@CancelledId AND
-		(
-				@StartTime>=[StartTime] AND (@StartTime<=[EndTime] OR ([EndTime] IS NULL AND ActualEnded IS NULL)) OR
-		@EndTime>[StartTime] AND (@EndTime<=[EndTime] OR [EndTime] IS NULL AND ActualEnded IS NULL) OR
-		@StartTime<=[StartTime] AND (@EndTime>=[EndTime] OR @EndTime IS NULL) OR
-		([EndTime] IS NULL OR @StartTime<=[EndTime]) AND @EndTime IS NULL
-			)
-	)
+	DECLARE @CancelledId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+	IF EXISTS (SELECT [Name] 
+				FROM [dbo].[Event] 
+				WHERE ([PLEClientStreamConfigId]=@PLEClientStreamConfigId OR PLEServerConfigId=@PLEServerConfigId) 
+					AND [EventStatusId]=@CancelledId 
+					AND	(@StartTime>=[StartTime] 
+						AND (@StartTime<=[EndTime] OR ([EndTime] IS NULL AND ActualEnded IS NULL)) 
+						OR	@EndTime>[StartTime] 
+						AND (@EndTime<=[EndTime] OR [EndTime] IS NULL AND ActualEnded IS NULL) 
+						OR	@StartTime<=[StartTime] 
+						AND (@EndTime>=[EndTime] OR @EndTime IS NULL) 
+						OR ([EndTime] IS NULL OR @StartTime<=[EndTime]) 
+						AND @EndTime IS NULL))
 		SELECT CAST(0 AS BIT) AS SUCCESSFUL
 	ELSE
-	BEGIN
-		BEGIN TRY
-			BEGIN TRANSACTION
-			DECLARE @EventActionId UNIQUEIDENTIFIER
-			SELECT @EventActionId=Id
-		FROM EventAction
-		WHERE [Name]='Schedule'
-			INSERT INTO [Event]
-			(
-			[Id]
-			,[Name]
-			,[CompanyId]
-			,[SourceDeviceId]
-			,[DestinationDeviceId]
-			,[StartTime]
-			,[EndTime]
-			,[CreatorId]
-			,[CreatedOn]
-			,[VideoProfileId]
-			,[ParentId]
-			,[RTT]
-			,[PLEClientStreamConfigId]
-			,[PLEServerStreamId]
-			,[PLEServerConfigId]
-			,[InputStreamId]
-			,[OutputStreamId]
-			,[SourceAcknowledgement]
-			,[DestinationAcknowledgement]
-			,[EventStatusId]
-			,VBitRate
-			,AudioChannels
-			,OwnerId,
-			ActualStarted,
-			ActualEnded,
-			ClosedCaption,
-			Tx,
-			Rx
-			)
-		VALUES
-			(
+		BEGIN
+			BEGIN TRY
+				BEGIN TRANSACTION
+				DECLARE @EventActionId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[EventAction] WHERE [Name]='Schedule')
+			INSERT INTO [dbo].[Event](
+				[Id],
+				[Name],
+				[CompanyId],
+				[SourceDeviceId],
+				[DestinationDeviceId],
+				[StartTime],
+				[EndTime],
+				[CreatorId],
+				[CreatedOn],
+				[VideoProfileId],
+				[ParentId],
+				[RTT],
+				[PLEClientStreamConfigId],
+				[PLEServerStreamId],
+				[PLEServerConfigId],
+				[InputStreamId],
+				[OutputStreamId],
+				[SourceAcknowledgement],
+				[DestinationAcknowledgement],
+				[EventStatusId],
+				[VBitRate],
+				[AudioChannels],
+				[OwnerId],
+				[ActualStarted],
+				[ActualEnded],
+				[ClosedCaption],
+				[Tx],
+				[Rx])
+			VALUES(
 				@Id,
 				@Name,
 				@CompanyId,
@@ -3507,26 +3499,23 @@ BEGIN
 				@ActualEnded,
 				@ClosedCaption,
 				@Tx,
-				@Rx
-				)
-				INSERT INTO EventHistory
-			(
-			[Id],
-			[EventId],
-			[UserId],
-			[ModifiedOn],
-			[EventActionId],
-			[ClosedCaption],
-			[Name],
-			[StartTime],
-			[EndTime],
-			[OwnerId],
-			[VideoProfileId],
-			[VBitRate],
-			[AudioChannels]
-			)
-		VALUES
-			(
+				@Rx)
+			
+			INSERT INTO [dbo].[EventHistory](
+				[Id],
+				[EventId],
+				[UserId],
+				[ModifiedOn],
+				[EventActionId],
+				[ClosedCaption],
+				[Name],
+				[StartTime],
+				[EndTime],
+				[OwnerId],
+				[VideoProfileId],
+				[VBitRate],
+				[AudioChannels])
+			VALUES(
 				NEWID(),
 				@Id,
 				@CreatorId,
@@ -3539,8 +3528,8 @@ BEGIN
 				@OwnerId,
 				@VideoProfileId,
 				@VBitRate,
-				@AudioChannels
-				)
+				@AudioChannels)
+				
 			SELECT CAST(1 AS BIT) AS SUCCESSFUL
 			COMMIT TRANSACTION
 		END TRY
@@ -3566,55 +3555,49 @@ AS
 BEGIN
 	BEGIN TRY
 		BEGIN TRANSACTION
+			UPDATE [dbo].[Event] SET 
+				[EventStatusId]=(SELECT [Id] FROM .[dbo].[EventStatus] WHERE [Name] = 'Goodnighting') 
+			WHERE [Id]=@EventId
 			
-			UPDATE [Event] 
-			SET [EventStatusId]=(SELECT [Id]
-	FROM .[dbo].[EventStatus]
-	WHERE [Name] = 'Goodnighting') 
-			WHERE Id=@EventId
-			
-			INSERT INTO EventHistory
-		(
-		[Id],
-		[EventId],
-		[UserId],
-		[ModifiedOn],
-		[EventActionId],
-		[ClosedCaption],
-		[Name],
-		[StartTime],
-		[EndTime],
-		[OwnerId],
-		[VideoProfileId],
-		[VBitRate],
-		[AudioChannels]
-		)
-	SELECT NEWID() AS Id,
-		Id AS EventId,
-		@UserId,
-		GETDATE() AS ModifiedOn,
-		(SELECT Id
-		FROM EventAction
-		WHERE [Name]='Goodnight') AS EventActionId,
-		[ClosedCaption],
-		[Name],
-		[StartTime],
-		GETDATE() AS [EndTime],
-		[OwnerId],
-		[VideoProfileId],
-		[VBitRate],
-		[AudioChannels]
-	FROM [Event]
-	WHERE Id=@EventId
+			INSERT INTO [dbo].[EventHistory](
+				[Id],
+				[EventId],
+				[UserId],
+				[ModifiedOn],
+				[EventActionId],
+				[ClosedCaption],
+				[Name],
+				[StartTime],
+				[EndTime],
+				[OwnerId],
+				[VideoProfileId],
+				[VBitRate],
+				[AudioChannels])
+			SELECT 
+				NEWID() AS [Id],
+				[Id] AS [EventId],
+				@UserId,
+				GETDATE() AS [ModifiedOn],
+				(SELECT [Id] FROM [dbo].[EventAction] WHERE [Name]='Goodnight') AS EventActionId,
+				[ClosedCaption],
+				[Name],
+				[StartTime],
+				GETDATE() AS [EndTime],
+				[OwnerId],
+				[VideoProfileId],
+				[VBitRate],
+				[AudioChannels]
+			FROM [dbo].[Event]
+			WHERE [Id]=@EventId
 			SELECT 0 AS SUCCESSFUL
 		COMMIT TRANSACTION
 	END TRY
 	BEGIN CATCH
 		IF @@TRANCOUNT > 0
-		BEGIN
-		ROLLBACK TRANSACTION
-		SELECT -2 AS SUCCESSFUL
-	END
+			BEGIN
+				ROLLBACK TRANSACTION
+				SELECT -2 AS SUCCESSFUL
+			END
 	END CATCH
 END
 GO
@@ -3640,83 +3623,80 @@ BEGIN
 		BEGIN TRANSACTION
 			IF @StartNow = 1
 				SET @StartTime = GETDATE()
-				
 			DECLARE @PLEClientStreamConfigId UNIQUEIDENTIFIER
 			DECLARE @PLEServerConfigId UNIQUEIDENTIFIER
-			DECLARE @CancelledId INT = (SELECT [Id]
-	FROM [EventStatus]
-	WHERE [Name] = 'Cancelled')
-			SELECT @PLEClientStreamConfigId=PLEClientStreamConfigId,
-		@PLEServerConfigId=PLEServerConfigId
-	FROM [Event]
-	WHERE Id=@EventId
-			IF EXISTS
-			(
-				SELECT [Name]
-	FROM [Event]
-	WHERE (PLEClientStreamConfigId=@PLEClientStreamConfigId OR PLEServerConfigId=@PLEServerConfigId) AND Id<>@EventId AND [EventStatusId]=@CancelledId AND
-		(
-						@StartTime>=[StartTime] AND (@StartTime<=[EndTime] OR ([EndTime] IS NULL AND ActualEnded IS NULL)) OR
-		@EndTime>[StartTime] AND (@EndTime<=[EndTime] OR [EndTime] IS NULL AND ActualEnded IS NULL) OR
-		@StartTime<=[StartTime] AND (@EndTime>=[EndTime] OR @EndTime IS NULL) OR
-		([EndTime] IS NULL OR @StartTime<=[EndTime]) AND @EndTime IS NULL
-					)
-			)
+			DECLARE @CancelledId INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+			SELECT 
+				@PLEClientStreamConfigId=PLEClientStreamConfigId,
+				@PLEServerConfigId=PLEServerConfigId
+			FROM [dbo].[Event]
+			WHERE [Id]=@EventId
+			IF EXISTS(SELECT [Name]	
+						FROM [dbo].[Event]
+						WHERE ([PLEClientStreamConfigId]=@PLEClientStreamConfigId OR [PLEServerConfigId]=@PLEServerConfigId) 
+							AND [Id]<>@EventId 
+							AND [EventStatusId]=@CancelledId 
+							AND(@StartTime>=[StartTime] 
+								AND (@StartTime<=[EndTime] OR ([EndTime] IS NULL AND ActualEnded IS NULL)) 
+								OR	@EndTime>[StartTime] 
+								AND (@EndTime<=[EndTime] OR [EndTime] IS NULL AND ActualEnded IS NULL) 
+								OR @StartTime<=[StartTime] 
+								AND (@EndTime>=[EndTime] OR @EndTime IS NULL) 
+								OR ([EndTime] IS NULL OR @StartTime<=[EndTime]) 
+								AND @EndTime IS NULL))
 				SELECT 1 AS SUCCESSFUL
 			ELSE
-			BEGIN
-		UPDATE [Event]
-				SET Name=@Name, 
-				   StartTime=@StartTime,
-				   EndTime=@EndTime,
-				   VideoProfileId=@VideoProfileId,
-				   VBitRate=@VBitRate,
-				   AudioChannels=@AudioChannels,
-				   OwnerId=@OwnerId
-				WHERE Id=@EventId
-		INSERT INTO EventHistory
-			(
-			[Id],
-			[EventId],
-			[UserId],
-			[ModifiedOn],
-			[EventActionId],
-			[ClosedCaption],
-			[Name],
-			[StartTime],
-			[EndTime],
-			[OwnerId],
-			[VideoProfileId],
-			[VBitRate],
-			[AudioChannels]
-			)
-		SELECT NEWID() AS Id,
-			Id AS EventId,
-			@UserId,
-			GETDATE() AS ModifiedOn,
-			(SELECT Id
-			FROM EventAction
-			WHERE [Name]='Update') AS EventActionId,
-			[ClosedCaption],
-			[Name],
-			[StartTime],
-			[EndTime],
-			[OwnerId],
-			[VideoProfileId],
-			[VBitRate],
-			[AudioChannels]
-		FROM [Event]
-		WHERE Id=@EventId
-		SELECT 0 AS SUCCESSFUL
-	END
+				BEGIN
+					UPDATE [dbo].[Event] SET 
+						[Name]=@Name, 
+						[StartTime]=@StartTime,
+						[EndTime]=@EndTime,
+						[VideoProfileId]=@VideoProfileId,
+						[VBitRate]=@VBitRate,
+						[AudioChannels]=@AudioChannels,
+						[OwnerId]=@OwnerId
+					WHERE [Id]=@EventId
+
+					INSERT INTO [dbo].[EventHistory](
+						[Id],
+						[EventId],
+						[UserId],
+						[ModifiedOn],
+						[EventActionId],
+						[ClosedCaption],
+						[Name],
+						[StartTime],
+						[EndTime],
+						[OwnerId],
+						[VideoProfileId],
+						[VBitRate],
+						[AudioChannels])
+					SELECT 
+						NEWID() AS [Id],
+						[Id] AS [EventId],
+						@UserId,
+						GETDATE() AS [ModifiedOn],
+						(SELECT [Id] FROM [dbo].[EventAction] WHERE [Name]='Update') AS EventActionId,
+						[ClosedCaption],
+						[Name],
+						[StartTime],
+						[EndTime],
+						[OwnerId],
+						[VideoProfileId],
+						[VBitRate],
+						[AudioChannels]
+					FROM [dbo].[Event] WHERE [Id]=@EventId
+
+					SELECT 0 AS SUCCESSFUL
+				END
 		COMMIT TRANSACTION
 	END TRY
 	BEGIN CATCH
 		IF @@TRANCOUNT > 0
-		BEGIN
-		ROLLBACK TRANSACTION
-		SELECT -2 AS SUCCESSFUL
-	END
+			BEGIN
+				ROLLBACK TRANSACTION
+				SELECT -2 AS SUCCESSFUL
+			END
 	END CATCH
 END
 GO
@@ -3739,230 +3719,134 @@ AS
 BEGIN
 
 	-- Ronny 
-	DECLARE @MonitorStatus_AllId INT		=(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'All')
-	DECLARE @MonitorStatus_RunningId INT	=(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Running')
-	DECLARE @MonitorStatus_FutureId INT		=(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Future')
-	DECLARE @MonitorStatus_PastId INT		=(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Past')
-	DECLARE @MonitorStatus_CancelledId INT	=(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Cancelled')
-	DECLARE @MonitorStatus_ClearedId INT	=(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Cleared')
+	DECLARE @MonitorStatus_AllId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'All')
+	DECLARE @MonitorStatus_RunningId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Running')
+	DECLARE @MonitorStatus_FutureId INT	= (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Future')
+	DECLARE @MonitorStatus_PastId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Past')
+	DECLARE @MonitorStatus_CancelledId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+	DECLARE @MonitorStatus_ClearedId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cleared')
 
-	DECLARE @All_Id INT				= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'All')
-	DECLARE @Scheduled_Id INT		= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Scheduled')
-	DECLARE @Starting_Id INT		= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Starting')
-	DECLARE @Started_Id INT			= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Started')
-	DECLARE @Stopping_Id INT		= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Stopping')
-	DECLARE @Stopped_Id INT			= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Stopped')
-	DECLARE @Goodnighting_Id INT	= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Goodnighting')
-	DECLARE @Goodnighted_Id INT		= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Goodnighted')
-	DECLARE @Clearing_Id INT		= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Clearing')
-	DECLARE @Cleared_Id INT			= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Cleared')
-	DECLARE @Cancelled_Id INT		= (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Cancelled')
-	-- End
+	DECLARE @All_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'All')
+	DECLARE @Scheduled_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Scheduled')
+	DECLARE @Starting_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Starting')
+	DECLARE @Started_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Started')
+	DECLARE @Stopping_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping')
+	DECLARE @Stopped_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Stopped')
+	DECLARE @Goodnighting_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Goodnighting')
+	DECLARE @Goodnighted_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Goodnighted')
+	DECLARE @Clearing_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Clearing')
+	DECLARE @Cleared_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Cleared')
+	DECLARE @Cancelled_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
 
-	DECLARE @PageId UNIQUEIDENTIFIER
-	SELECT @PageId=Id
-	FROM Page
-	WHERE Url=@PageUrl
-	DECLARE @EditButtonId UNIQUEIDENTIFIER
-	DECLARE @CancelButtonId UNIQUEIDENTIFIER
-	DECLARE @GoodnightButtonId UNIQUEIDENTIFIER
-	DECLARE @ExtendButtonId UNIQUEIDENTIFIER
-	DECLARE @ConnectionButtonId UNIQUEIDENTIFIER
-	DECLARE @VideoButtonId UNIQUEIDENTIFIER
-	DECLARE @ClearButtonId UNIQUEIDENTIFIER
-	DECLARE @RestartEncoderButtonId UNIQUEIDENTIFIER
-	DECLARE @ToolSourceButtonId UNIQUEIDENTIFIER
-	DECLARE @ToolDestinationButtonId UNIQUEIDENTIFIER
-	DECLARE @LogButtonId UNIQUEIDENTIFIER
-	SELECT @EditButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Edit') AND ForGridUse=1
-	SELECT @CancelButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Cancel') AND ForGridUse=1
-	SELECT @GoodnightButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Goodnight') AND ForGridUse=1
-	SELECT @ExtendButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Extend') AND ForGridUse=1
-	SELECT @ConnectionButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Connection') AND ForGridUse=1
-	SELECT @VideoButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Video') AND ForGridUse=1
-	SELECT @ClearButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Clear') AND ForGridUse=1
-	SELECT @RestartEncoderButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Restart Encoder') AND ForGridUse=1
-	SELECT @ToolSourceButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Tool Source') AND ForGridUse=1
-	SELECT @ToolDestinationButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Tool Destination') AND ForGridUse=1
-	SELECT @LogButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Log') AND ForGridUse=1
-	DECLARE @CompanyId UNIQUEIDENTIFIER
-	SELECT @CompanyId=CompanyId
-	FROM [User]
-	WHERE Id=@UserId
-
-	SELECT [Event].[Id]						-- 0
-		  , [Event].[Name]					-- 1
-		  , [Event].[CompanyId]				-- 2
-		  , [SourceDeviceId]					-- 3
-		  , [DestinationDeviceId]			-- 4
-		  , [StartTime]						-- 5
-		  , [EndTime]						-- 6
-		  , [CreatorId]						-- 7
-		  , [CreatedOn]						-- 9
-		  , [VideoProfileId]					--10
-		  , [ParentId]						--11
-		  , [RTT]							--12
-		  , [PLEClientStreamConfigId]		--13
-		  , [PLEServerStreamId]				--14
-		  , [PLEServerConfigId]				--15
-		  , [InputStreamId]					--16
-		  , [OutputStreamId]					--17
-		  , DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond	--18
-		  , CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond		--19
-		  , [SourceAcknowledgement]			--20
-		  , [DestinationAcknowledgement]		--21
-		  , [EventStatusId]					--22
-		  , [VBitRate]						--23
-		  , [AudioChannels]					--24
-		  , [OwnerId]						--25
-		  , [ActualStarted]					--26
-		  , [ActualEnded]					--27
-		  , [ClosedCaption]					--28
-		  , [Event].[SerialNumber]			--29
-		  , [Tx]								--30
-		  , [Rx]								--31
-		  , CASE  WHEN [EventStatusId]=@Starting_Id THEN 'Yellow' 
-				WHEN [EventStatusId]= @Started_Id 	THEN 'Green' 
-				ELSE 'Red' 
-				END AS TrafficLight
-
-		  , CASE WHEN EndTime IS NULL AND ActualEnded IS NULL 
-					THEN '&#x221e;' --???????????????????
-					ELSE CASE WHEN ActualEnded IS NULL 
-								THEN CONVERT(VARCHAR(15), DATEDIFF(minute, CURRENT_TIMESTAMP, EndTime)) 
-								ELSE '0' 
-					END 
-				END AS Remaining
-		  , HostSource.IPAddress AS SourceIp
-		  , HostSource.TunnelIP AS SourceVpn
-		  , HostDestination.IPAddress AS DestinationIP
-		  , HostDestination.TunnelIP AS DestinationVpn
-		  , PLEServerStream.ConfigFileName AS DestinationConfigFileName		-- for log use
-		  , CASE WHEN ActualEnded IS NOT NULL AND ActualStarted IS NOT NULL THEN DATEDIFF(minute, ActualStarted, ActualEnded) ELSE NULL END AS Duration
+	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]=@PageUrl)
+	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit'))
+	DECLARE @CancelButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Cancel'))
+	DECLARE @GoodnightButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Goodnight'))
+	DECLARE @ExtendButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Extend'))
+	DECLARE @ConnectionButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Connection'))
+	DECLARE @VideoButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Video'))
+	DECLARE @ClearButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Clear'))
+	DECLARE @RestartEncoderButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Restart Encoder'))
+	DECLARE @ToolSourceButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Tool Source'))
+	DECLARE @ToolDestinationButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Tool Destination'))
+	DECLARE @LogButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Log'))
+	
+	SELECT 
+		[Event].[Id],						-- 0
+		[Event].[Name],						-- 1
+		[Event].[CompanyId],				-- 2
+		[SourceDeviceId],					-- 3
+		[DestinationDeviceId],				-- 4
+		[StartTime],						-- 5
+		[EndTime],							-- 6
+		[CreatorId],						-- 7
+		[CreatedOn],						-- 9
+		[VideoProfileId],					--10
+		[ParentId],							--11
+		[RTT],								--12
+		[PLEClientStreamConfigId],			--13
+		[PLEServerStreamId],				--14
+		[PLEServerConfigId],				--15
+		[InputStreamId],					--16
+		[OutputStreamId],					--17
+		DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond,	--18
+		CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond,		--19
+		[SourceAcknowledgement],			--20
+		[DestinationAcknowledgement],		--21
+		[EventStatusId],					--22
+		[VBitRate],							--23
+		[AudioChannels],					--24
+		[OwnerId],							--25
+		[ActualStarted],					--26
+		[ActualEnded],						--27
+		[ClosedCaption],					--28
+		[Event].[SerialNumber],				--29
+		[Tx],								--30
+		[Rx],								--31
+		CASE WHEN [EventStatusId]=@Starting_Id THEN 'Yellow' 
+			WHEN [EventStatusId]= @Started_Id THEN 'Green' 
+			ELSE 'Red' 
+		END AS TrafficLight,
+		CASE WHEN EndTime IS NULL AND ActualEnded IS NULL THEN '&#x221e;' --???????????????????
+			ELSE CASE WHEN ActualEnded IS NULL 
+					THEN CONVERT(VARCHAR(15), DATEDIFF(minute, CURRENT_TIMESTAMP, EndTime)) 
+					ELSE '0' 
+				END 
+		END AS Remaining,
+		[HostSource].[IPAddress] AS SourceIp,
+		[HostSource].[TunnelIP] AS SourceVpn,
+		[HostDestination].[IPAddress] AS DestinationIP,
+		[HostDestination].[TunnelIP] AS DestinationVpn,
+		[PLEServerStream].[ConfigFileName] AS DestinationConfigFileName,		-- for log use
+		CASE WHEN [ActualEnded] IS NOT NULL AND [ActualStarted] IS NOT NULL THEN DATEDIFF(minute, ActualStarted, ActualEnded) 
+			ELSE NULL END AS Duration,
 
 		-- Used in the Scheduling view
-		  , CASE WHEN [EventStatusId] IN (@Starting_Id, @Started_Id, @Stopping_Id)	THEN @MonitorStatus_RunningId		
-				WHEN [EventStatusId]=@Scheduled_Id									THEN @MonitorStatus_FutureId		
-				WHEN [EventStatusId] IN (@Goodnighted_Id, @Stopped_Id)				THEN @MonitorStatus_PastId		
-				WHEN [EventStatusId] = @Cancelled_Id								THEN @MonitorStatus_CancelledId	
-				WHEN [EventStatusId]=@Cleared_Id 									THEN @MonitorStatus_ClearedId		
-			END AS SchedulingStatus
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @CancelButtonId) AS CancelButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GoodnightButtonId) AS GoodnightButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ExtendButtonId) AS ExtendButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ConnectionButtonId) AS ConnectionButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @VideoButtonId) AS VideoButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ClearButtonId) AS ClearButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @RestartEncoderButtonId) AS RestartEncoderButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ToolSourceButtonId) AS ToolSourceButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ToolDestinationButtonId) AS ToolDestinationButton
-			, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @LogButtonId) AS LogButton
-			, DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), StartTime) AS StartTimeUTC
-			, DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), EndTime) AS EndTimeUTC
-			, DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), ActualStarted) AS ActualStartedUTC
-			, DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), ActualEnded) AS ActualEndedUTC
-	FROM [Event]
-		INNER JOIN PLEClientStreamConfig INNER JOIN Host HostSource ON HostSource.Id=PLEClientStreamConfig.HostId ON PLEClientStreamConfig.Id=[Event].PLEClientStreamConfigId
-		INNER JOIN PLEServerStream INNER JOIN Host HostDestination ON HostDestination.Id=PLEServerStream.HostId ON PLEServerStream.Id=[Event].PLEServerStreamId
-	WHERE 
-	(
-		[Event].[CompanyId] = @CompanyId OR
-		(SELECT Id
-		FROM Company
-		WHERE IsMaster=1)=@CompanyId OR
-		HostSource.[CompanyId] = @CompanyId OR
-		HostDestination.[CompanyId] = @CompanyId
-	)
-		AND
-		(
-		(@Monitor_Status = @MonitorStatus_AllId)
-		OR (@Monitor_Status = @MonitorStatus_RunningId AND [EventStatusId] IN (@Starting_Id, @Started_Id, @Stopping_Id))
-		OR (@Monitor_Status = @MonitorStatus_FutureId AND [EventStatusId] = @Scheduled_Id)
-		OR (@Monitor_Status = @MonitorStatus_PastId AND [EventStatusId] IN (@Goodnighted_Id, @Stopped_Id))
-		OR (@Monitor_Status = @MonitorStatus_CancelledId AND [EventStatusId] = @Cancelled_Id)
-		OR (@Monitor_Status = @MonitorStatus_ClearedId AND [EventStatusId] = @Cleared_Id)									
-	)
+		CASE WHEN [EventStatusId] IN (@Starting_Id, @Started_Id, @Stopping_Id) THEN @MonitorStatus_RunningId		
+				WHEN [EventStatusId]=@Scheduled_Id THEN @MonitorStatus_FutureId		
+				WHEN [EventStatusId] IN (@Goodnighted_Id, @Stopped_Id) THEN @MonitorStatus_PastId		
+				WHEN [EventStatusId] = @Cancelled_Id THEN @MonitorStatus_CancelledId	
+				WHEN [EventStatusId]=@Cleared_Id THEN @MonitorStatus_ClearedId		
+			END AS SchedulingStatus,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @CancelButtonId) AS CancelButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GoodnightButtonId) AS GoodnightButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ExtendButtonId) AS ExtendButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ConnectionButtonId) AS ConnectionButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @VideoButtonId) AS VideoButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ClearButtonId) AS ClearButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @RestartEncoderButtonId) AS RestartEncoderButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ToolSourceButtonId) AS ToolSourceButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ToolDestinationButtonId) AS ToolDestinationButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @LogButtonId) AS LogButton,
+		DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), StartTime) AS StartTimeUTC,
+		DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), EndTime) AS EndTimeUTC,
+		DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), ActualStarted) AS ActualStartedUTC,
+		DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), ActualEnded) AS ActualEndedUTC
+	FROM [dbo].[Event]
 
+	INNER JOIN [dbo].[PLEClientStreamConfig] 
+		INNER JOIN [dbo].[Host] HostSource 
+			ON [HostSource].[Id]=[dbo].[PLEClientStreamConfig].[HostId] 
+	ON [dbo].[PLEClientStreamConfig].[Id]=[dbo].[Event].[PLEClientStreamConfigId]
+	INNER JOIN [dbo].[PLEServerStream] 
+		INNER JOIN [dbo].[Host] HostDestination 
+			ON [HostDestination].[Id]=[dbo].[PLEServerStream].[HostId] 
+	ON [dbo].[PLEServerStream].[Id]=[dbo].[Event].[PLEServerStreamId]
+
+	WHERE ([Event].[CompanyId] = @CompanyId 
+			OR (SELECT [Id] FROM [dbo].[Company] WHERE [IsMaster]=1)=@CompanyId 
+			OR [HostSource].[CompanyId] = @CompanyId 
+			OR [HostDestination].[CompanyId] = @CompanyId)
+		AND ((@Monitor_Status = @MonitorStatus_AllId)
+			OR (@Monitor_Status = @MonitorStatus_RunningId AND [EventStatusId] IN (@Starting_Id, @Started_Id, @Stopping_Id))
+			OR (@Monitor_Status = @MonitorStatus_FutureId AND [EventStatusId] = @Scheduled_Id)
+			OR (@Monitor_Status = @MonitorStatus_PastId AND [EventStatusId] IN (@Goodnighted_Id, @Stopped_Id))
+			OR (@Monitor_Status = @MonitorStatus_CancelledId AND [EventStatusId] = @Cancelled_Id)
+			OR (@Monitor_Status = @MonitorStatus_ClearedId AND [EventStatusId] = @Cleared_Id))
 	ORDER BY [StartTime] DESC, [EndTime] DESC
+
+
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Event_ExtendByUserId]    Script Date: 09/07/2017 14:00:15 ******/
@@ -3982,74 +3866,68 @@ BEGIN
 			DECLARE @EndTime DATETIME
 			DECLARE @PLEClientStreamConfigId UNIQUEIDENTIFIER
 			DECLARE @PLEServerConfigId UNIQUEIDENTIFIER
-			DECLARE @CancelledId INT = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Cancelled')
-			SELECT @StartTime=EndTime, @EndTime=DATEADD(minute,
-				@Timespan, EndTime),
-		@PLEClientStreamConfigId=PLEClientStreamConfigId,
-		@PLEServerConfigId=PLEServerConfigId
-	FROM [Event]
-	WHERE Id=@EventId
-			IF EXISTS
-			(
-				SELECT [Name]
-	FROM [Event]
-	WHERE (PLEClientStreamConfigId=@PLEClientStreamConfigId OR PLEServerConfigId=@PLEServerConfigId) AND Id<>@EventId AND [EventStatusId]<>@CancelledId AND
-		(
-						@StartTime>=[StartTime] AND (@StartTime<=[EndTime] OR ([EndTime] IS NULL AND ActualEnded IS NULL)) OR
-		@EndTime>[StartTime] AND (@EndTime<=[EndTime] OR [EndTime] IS NULL AND ActualEnded IS NULL) OR
-		@StartTime<=[StartTime] AND (@EndTime>=[EndTime] OR @EndTime IS NULL) OR
-		([EndTime] IS NULL OR @StartTime<=[EndTime]) AND @EndTime IS NULL
-					)
-			)
+			DECLARE @CancelledId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+			SELECT 
+				@StartTime=EndTime, 
+				@EndTime=DATEADD(minute,@Timespan, EndTime),
+				@PLEClientStreamConfigId=PLEClientStreamConfigId,
+				@PLEServerConfigId=PLEServerConfigId
+			FROM [dbo].[Event] WHERE [Id]=@EventId
+			IF EXISTS (SELECT [Name] 
+							FROM [dbo].[Event] 
+							WHERE ([PLEClientStreamConfigId]=@PLEClientStreamConfigId OR [PLEServerConfigId]=@PLEServerConfigId) 
+								AND [Id]<>@EventId AND [EventStatusId]<>@CancelledId 
+								AND	(@StartTime>=[StartTime] 
+										AND (@StartTime<=[EndTime] OR ([EndTime] IS NULL AND ActualEnded IS NULL))
+										OR @EndTime>[StartTime] 
+										AND (@EndTime<=[EndTime] OR [EndTime] IS NULL AND ActualEnded IS NULL)
+										OR @StartTime<=[StartTime] 
+										AND (@EndTime>=[EndTime] OR @EndTime IS NULL) 
+										OR ([EndTime] IS NULL OR @StartTime<=[EndTime]) 
+										AND @EndTime IS NULL))
 				SELECT 1 AS SUCCESSFUL
 			ELSE
-			BEGIN
-		UPDATE [Event] SET EndTime=@EndTime WHERE Id=@EventId
-		INSERT INTO EventHistory
-			(
-			[Id],
-			[EventId],
-			[UserId],
-			[ModifiedOn],
-			[EventActionId],
-			[ClosedCaption],
-			[Name],
-			[StartTime],
-			[EndTime],
-			[OwnerId],
-			[VideoProfileId],
-			[VBitRate],
-			[AudioChannels]
-			)
-		SELECT NEWID() AS Id,
-			Id AS EventId,
-			@UserId,
-			GETDATE() AS ModifiedOn,
-			(SELECT Id
-			FROM EventAction
-			WHERE [Name]='Extend') AS EventActionId,
-			[ClosedCaption],
-			[Name],
-			[StartTime],
-			@EndTime AS [EndTime],
-			[OwnerId],
-			[VideoProfileId],
-			[VBitRate],
-			[AudioChannels]
-		FROM [Event]
-		WHERE Id=@EventId
-		SELECT 0 AS SUCCESSFUL
-	END
+				BEGIN
+					UPDATE [dbo].[Event] SET [EndTime]=@EndTime WHERE [Id]=@EventId
+					INSERT INTO [dbo].[EventHistory](
+						[Id],
+						[EventId],
+						[UserId],
+						[ModifiedOn],
+						[EventActionId],
+						[ClosedCaption],
+						[Name],
+						[StartTime],
+						[EndTime],
+						[OwnerId],
+						[VideoProfileId],
+						[VBitRate],
+						[AudioChannels])
+					SELECT 
+						NEWID() AS [Id],
+						[Id] AS [EventId],
+						@UserId,
+						GETDATE() AS [ModifiedOn],
+						(SELECT [Id] FROM [dbo].[EventAction] WHERE [Name]='Extend') AS [EventActionId],
+						[ClosedCaption],
+						[Name],
+						[StartTime],
+						@EndTime AS [EndTime],
+						[OwnerId],
+						[VideoProfileId],
+						[VBitRate],
+						[AudioChannels]
+					FROM [dbo].[Event] WHERE [Id]=@EventId
+					SELECT 0 AS SUCCESSFUL
+				END
 		COMMIT TRANSACTION
 	END TRY
 	BEGIN CATCH
 		IF @@TRANCOUNT > 0
-		BEGIN
-		ROLLBACK TRANSACTION
-		SELECT -2 AS SUCCESSFUL
-	END
+			BEGIN
+				ROLLBACK TRANSACTION
+				SELECT -2 AS SUCCESSFUL
+			END
 	END CATCH
 END
 GO
@@ -4065,52 +3943,46 @@ AS
 BEGIN
 	BEGIN TRY
 		BEGIN TRANSACTION
-		DECLARE @CancelledId INT = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Canceled')
-			UPDATE [Event] SET [EventStatusId]=@CancelledId  WHERE Id=@EventId
-			INSERT INTO EventHistory
-		(
-		[Id],
-		[EventId],
-		[UserId],
-		[ModifiedOn],
-		[EventActionId],
-		[ClosedCaption],
-		[Name],
-		[StartTime],
-		[EndTime],
-		[OwnerId],
-		[VideoProfileId],
-		[VBitRate],
-		[AudioChannels]
-		)
-	SELECT NEWID() AS Id,
-		Id AS EventId,
-		@UserId,
-		GETDATE() AS ModifiedOn,
-		(SELECT Id
-		FROM EventAction
-		WHERE [Name]='Cancel') AS EventActionId,
-		[ClosedCaption],
-		[Name],
-		[StartTime],
-		GETDATE() AS [EndTime],
-		[OwnerId],
-		[VideoProfileId],
-		[VBitRate],
-		[AudioChannels]
-	FROM [Event]
-	WHERE Id=@EventId
+			DECLARE @CancelledId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+			UPDATE [dbo].[Event] SET [EventStatusId]=@CancelledId WHERE Id=@EventId
+			INSERT INTO [dbo].[EventHistory](
+				[Id],
+				[EventId],
+				[UserId],
+				[ModifiedOn],
+				[EventActionId],
+				[ClosedCaption],
+				[Name],
+				[StartTime],
+				[EndTime],
+				[OwnerId],
+				[VideoProfileId],
+				[VBitRate],
+				[AudioChannels])
+			SELECT 
+				NEWID() AS [Id],
+				[Id] AS [EventId],
+				@UserId,
+				GETDATE() AS [ModifiedOn],
+				(SELECT [Id] FROM [dbo].[EventAction] WHERE [Name]='Cancel') AS EventActionId,
+				[ClosedCaption],
+				[Name],
+				[StartTime],
+				GETDATE() AS [EndTime],
+				[OwnerId],
+				[VideoProfileId],
+				[VBitRate],
+				[AudioChannels]
+			FROM [dbo].[Event] WHERE [Id]=@EventId
 			SELECT 0 AS SUCCESSFUL
 		COMMIT TRANSACTION
 	END TRY
 	BEGIN CATCH
 		IF @@TRANCOUNT > 0
-		BEGIN
-		ROLLBACK TRANSACTION
-		SELECT -2 AS SUCCESSFUL
-	END
+			BEGIN
+				ROLLBACK TRANSACTION
+				SELECT -2 AS SUCCESSFUL
+			END
 	END CATCH
 END
 GO
@@ -4124,35 +3996,26 @@ CREATE PROCEDURE [dbo].[Device_GetListByHostIdUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER
-	SELECT @PageId=Id
-	FROM Page
-	WHERE Url='Host.aspx'
-	DECLARE @CalendarButtonId UNIQUEIDENTIFIER
-	DECLARE @PermissionsButtonId UNIQUEIDENTIFIER
-	SELECT @CalendarButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Calendar') AND ForGridUse=1
-	SELECT @PermissionsButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Device Permissions') AND ForGridUse=1
-	SELECT Id, Name, HostId, ConfigFileName, Type,
-		CASE Type WHEN 'Encoder INTernal' THEN 0 WHEN 'Encoder External' THEN 1 WHEN 'Decoder INTernal' THEN 2 WHEN 'Decoder External' THEN 3 END AS SortOrder
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @CalendarButtonId) AS CalendarButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @PermissionsButtonId) AS PermissionsButton
-		, (SELECT CompanyId
-		FROM [Host]
-		WHERE Id=View_HostDevice.HostId) AS CompanyId
-		, CAST(Id AS VARCHAR(40)) + '|' + (SELECT Name
-		FROM Host
-		WHERE Id=@HostId) + ': ' + Name AS IdName
-	FROM View_HostDevice
-	WHERE HostId=@HostId
-	ORDER BY SortOrder, Name
+	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Host.aspx')
+	DECLARE @CalendarButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Calendar')
+	DECLARE @PermissionsButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Device Permissions')
+	DECLARE @CalendarGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=@CalendarButtonId)
+	DECLARE @PermissionsGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton]	WHERE [PageId]=@PageId AND [ButtonId]=@PermissionsButtonId)
+
+	SELECT 
+		[Id], 
+		[Name], 
+		[HostId], 
+		[ConfigFileName], 
+		[Type],
+		CASE [Type] WHEN 'Encoder Internal' THEN 0 WHEN 'Encoder External' THEN 1 WHEN 'Decoder Internal' THEN 2 WHEN 'Decoder External' THEN 3 END AS SortOrder,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @CalendarGridButtonId) AS CalendarButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @PermissionsGridButtonId) AS PermissionsButton,
+		(SELECT [CompanyId] FROM [dbo].[Host] WHERE [Id]=[dbo].[View_HostDevice].[HostId]) AS CompanyId,
+		CAST([Id] AS VARCHAR(40)) + '|' + (SELECT [Name] FROM [dbo].[Host] WHERE [Id]=@HostId) + ': ' + [Name] AS IdName
+	FROM [dbo].[View_HostDevice]
+	WHERE [HostId]=@HostId
+	ORDER BY [SortOrder], [Name]
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Company_GetListByUserId]    Script Date: 09/07/2017 14:00:15 ******/
@@ -4164,37 +4027,22 @@ CREATE PROCEDURE [dbo].[Company_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER
-	SELECT @PageId=Id
-	FROM Page
-	WHERE Url='Companies.aspx'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER
-	SELECT @EditButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Edit') AND ForGridUse=1
-	SELECT @DeleteButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Delete') AND ForGridUse=1
+	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[Page] WHERE [Url]='Companies.aspx')
+	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
+	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[Button]	WHERE [Name]='Delete')
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButtonPageId AND [ButtonId]=@EditButtonId)
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[GridButton]	WHERE [PageId]=@ButtonPageId AND [ButtonId]=@DeleteButtonId)
+
 	SELECT
-		View_Company.*,
-		dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton,
-		dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteButtonId) AS DeleteButton
-	FROM View_Company
-	WHERE Enabled=1
-		AND EXISTS(SELECT Name
-		FROM Company
-		WHERE Id=(SELECT CompanyId
-			FROM [User]
-			WHERE Id=@UserId) AND IsMaster=1)
-		OR Id=(SELECT CompanyId
-		FROM [User]
-		WHERE Id=@UserId)
-	ORDER BY View_Company.[Name]
+		[View_Company].*,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteButtonId) AS DeleteButton
+	FROM [dbo].[View_Company]
+	WHERE [Enabled]=1
+		AND EXISTS(SELECT [Name] FROM [dbo].[Company] WHERE [Id]
+					=(SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId) AND [IsMaster]=1)
+		OR [Id]=(SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId) 
+	ORDER BY [View_Company].[Name]
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Button_GetListByUserId]    Script Date: 09/07/2017 14:00:15 ******/
@@ -4206,34 +4054,24 @@ CREATE PROCEDURE [dbo].[Button_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER
-	SELECT @PageId=Id
-	FROM Page
-	WHERE Url='Buttons.aspx'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER
-	SELECT @EditButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Edit') AND ForGridUse=1
-	SELECT @DeleteButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Delete') AND ForGridUse=1
-	SELECT Id, Name, ImageId, IsHome, (SELECT Url
-		FROM [dbo].[Image]
-		WHERE Id=Button.ImageId) AS ImageUrl
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteButtonId) AS DeleteButton
-	FROM Button
-	WHERE (SELECT Id
-	FROM Company
-	WHERE IsMaster=1)=(SELECT CompanyId
-	FROM [User]
-	WHERE Id=@UserId)
-	ORDER BY Name
+	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Buttons.aspx')
+	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
+	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[Button]	WHERE [Name]='Delete')
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButtonPageId AND [ButtonId]=@EditButtonId)
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[GridButton]	WHERE [PageId]=@ButtonPageId AND [ButtonId]=@DeleteButtonId)
+
+	SELECT 
+		[Id], 
+		[Name], 
+		[ImageId], 
+		[IsHome], 
+		(SELECT Url	FROM [dbo].[Image]	WHERE Id=Button.ImageId) AS ImageUrl,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteGridButtonId) AS DeleteButton
+	FROM [dbo].[Button]
+	WHERE (SELECT [Id] FROM [dbo].[Company] WHERE [IsMaster]=1)
+			=(SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId)
+	ORDER BY [Name]
 END
 GO
 /****** Object:  StoredProcedure [dbo].[BrandUrl_GetListByUserIdBrandId]    Script Date: 09/07/2017 14:00:15 ******/
@@ -4246,30 +4084,21 @@ CREATE PROCEDURE [dbo].[BrandUrl_GetListByUserIdBrandId]
 	@BrandId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @ButtonPageId UNIQUEIDENTIFIER
-	SELECT @ButtonPageId=Id
-	FROM Page
-	WHERE Url='Brands.aspx'
-	DECLARE @EditSubButtonId UNIQUEIDENTIFIER
-	DECLARE @DeleteSubButtonId UNIQUEIDENTIFIER
-	SELECT @EditSubButtonId=Id
-	FROM PageButton
-	WHERE PageId=@ButtonPageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='EditSub') AND ForGridUse=1
-	SELECT @DeleteSubButtonId=Id
-	FROM PageButton
-	WHERE PageId=@ButtonPageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='DeleteSub') AND ForGridUse=1
-	SELECT [Id]
-      , [BrandId]
-      , [Url]
-	, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditSubButtonId) AS EditButton
-	, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteSubButtonId) AS DeleteButton
-	FROM BrandUrl
-	WHERE BrandId=@BrandId
-	ORDER BY Url
+	DECLARE @ButtonPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Brands.aspx')
+	DECLARE @EditSubButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='EditSub')
+	DECLARE @DeleteSubButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button]	WHERE [Name]='DeleteSub')
+	DECLARE @EditSubGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButtonPageId AND [ButtonId]=@EditSubButtonId)
+	DECLARE @DeleteSubGridButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[GridButton]	WHERE [PageId]=@ButtonPageId AND [ButtonId]=@DeleteSubButtonId)
+
+	SELECT 
+		[Id],
+      	[BrandId],
+      	[Url],
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditSubGridButtonId) AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteSubGridButtonId) AS DeleteButton
+	FROM [dbo].[BrandUrl]
+	WHERE [BrandId]=@BrandId
+	ORDER BY [Url]
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Brand_GetListByUserId]    Script Date: 09/07/2017 14:00:15 ******/
@@ -4281,54 +4110,34 @@ CREATE PROCEDURE [dbo].[Brand_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @ButtonPageId UNIQUEIDENTIFIER
-	SELECT @ButtonPageId=Id
-	FROM Page
-	WHERE Url='Brands.aspx'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER
-	SELECT @EditButtonId=Id
-	FROM PageButton
-	WHERE PageId=@ButtonPageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Edit') AND ForGridUse=1
-	SELECT @DeleteButtonId=Id
-	FROM PageButton
-	WHERE PageId=@ButtonPageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Delete') AND ForGridUse=1
-	SELECT Id
-	  , [Name]
-	  , [LoginBannerImageId]
-	  , [LoginTagImageId]
-	  , [PortalImageId]
-	  , [FaviconImageId]
-      , [FooterCaption]
-      , [IsDefault]
-      , (SELECT Url
-		FROM [dbo].[Image]
-		WHERE Id=[Brand].[LoginBannerImageId]) AS LoginBannerURL
-      , (SELECT Url
-		FROM [dbo].[Image]
-		WHERE Id=[Brand].[LoginTagImageId]) AS LoginTagURL
-      , (SELECT Url
-		FROM [dbo].[Image]
-		WHERE Id=[Brand].[PortalImageId]) AS PortalImageURL
-      , (SELECT Url
-		FROM [dbo].[Image]
-		WHERE Id=[Brand].[FaviconImageId]) AS FaviconURL
-	, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton
-	, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteButtonId) AS DeleteButton
-	FROM Brand
-	WHERE Id IN 
-	(
-		SELECT ObjectId
-	FROM RoleObjectScope
-	WHERE RoleCompanyId IN (SELECT RoleCompanyId
-	FROM UserRole
-	WHERE UserId=@UserId)
-	)
-	ORDER BY Name
+	DECLARE @ButtonPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Brands.aspx')
+	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
+	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[Button]	WHERE [Name]='Delete')
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButtonPageId AND [ButtonId]=@EditButtonId)
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[GridButton]	WHERE [PageId]=@ButtonPageId AND [ButtonId]=@DeleteButtonId)
+	
+	SELECT 
+		[Id],
+		[Name],
+		[LoginBannerImageId],
+		[LoginTagImageId],
+		[PortalImageId],
+		[FaviconImageId],
+		[FooterCaption],
+		[IsDefault],
+		(SELECT [Url] FROM [dbo].[Image] WHERE [Id]=[Brand].[LoginBannerImageId]) AS LoginBannerURL,
+		(SELECT [Url] FROM [dbo].[Image] WHERE [Id]=[Brand].[LoginTagImageId]) AS LoginTagURL,
+		(SELECT [Url] FROM [dbo].[Image] WHERE [Id]=[Brand].[PortalImageId]) AS PortalImageURL,
+		(SELECT [Url] FROM [dbo].[Image] WHERE [Id]=[Brand].[FaviconImageId]) AS FaviconURL,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteGridButtonId) AS DeleteButton
+	FROM [dbo].[Brand] 
+	WHERE [Id] IN (SELECT [BrandId] 
+					FROM [dbo].[BrandRoleScope]	
+					WHERE [RoleCompanyId] IN (SELECT [dbo].[RoleCompanyId]
+												FROM [dbo].[UserRole] 
+												WHERE [UserId]=@UserId))
+	ORDER BY [Name]
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Event_Scheduled_Stop]    Script Date: 09/07/2017 14:14:24 ******/
@@ -4344,22 +4153,16 @@ GO
 CREATE PROCEDURE [dbo].[Event_Scheduled_Stop]
 AS
 BEGIN
-	DECLARE	@Started_Id INT;
-	DECLARE	@Stopping_Id INT;
-
-	SET @Started_Id = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Started');
-	SET @Stopping_Id = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Stopping');
+	DECLARE	@Started_Id INT = (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Started');
+	DECLARE	@Stopping_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping');
 
 	-- Updates the events that were started by the DeviceCaster
-	UPDATE [dbo].[Event]
-		SET [EventStatusId] = @Stopping_Id						
-			,[SourceAcknowledgement] = 0
-			,[DestinationAcknowledgement] = 0
-		WHERE [EndTime] <= CURRENT_TIMESTAMP AND [EventStatusId] = @Started_Id
+	UPDATE [dbo].[Event] SET 
+		[EventStatusId] = @Stopping_Id,						
+		[SourceAcknowledgement] = 0,
+		[DestinationAcknowledgement] = 0
+	WHERE [EndTime] <= CURRENT_TIMESTAMP 
+		AND [EventStatusId] = @Started_Id
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Event_Scheduled_Start]    Script Date: 09/07/2017 14:14:24 ******/
@@ -4375,26 +4178,17 @@ GO
 CREATE PROCEDURE [dbo].[Event_Scheduled_Start]
 AS
 BEGIN
-	DECLARE	@Scheduled_Id INT;
-	DECLARE	@Starting_Id INT;
-	DECLARE @In_Advance_Period_Minute INT;
-	SET @In_Advance_Period_Minute = 1;
-	-- this value is subject to possible modification
-
-
-	SET @Scheduled_Id = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Scheduled');
-	SET @Starting_Id = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Starting');
+	DECLARE	@Scheduled_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Scheduled');
+	DECLARE	@Starting_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Starting');
+	DECLARE @In_Advance_Period_Minute INT = 1 -- this value is subject to possible modification
 
 	-- Update the events that are due wiht in one minute
-	UPDATE [dbo].[Event]
-	SET [EventStatusId] = @Starting_Id
-		,[SourceAcknowledgement] = 0
-		,[DestinationAcknowledgement] = 0					
-	WHERE [StartTime] <= DATEADD(MINUTE, @In_Advance_Period_Minute, CURRENT_TIMESTAMP) AND [EventStatusId] = @Scheduled_Id
+	UPDATE [dbo].[Event] SET 
+		[EventStatusId] = @Starting_Id,
+		[SourceAcknowledgement] = 0,
+		[DestinationAcknowledgement] = 0					
+	WHERE [StartTime] <= DATEADD(MINUTE, @In_Advance_Period_Minute, CURRENT_TIMESTAMP) 
+		AND [EventStatusId] = @Scheduled_Id
 
 END
 GO
@@ -4411,33 +4205,19 @@ GO
 CREATE PROCEDURE [dbo].[Event_Scheduled_Clear]
 AS
 BEGIN
-	DECLARE	@Starting_Id INT;
-	DECLARE	@Stopping_Id INT;
-	DECLARE @Goodnighting_Id INT;
-	DECLARE	@Clearing_Id INT;
-	DECLARE @Grace_period_Minute INT;
-	SET @Grace_period_Minute = 5;
-	-- this value is subject to possible modification
-
-	SET @Starting_Id =		(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Starting');
-	SET @Stopping_Id =		(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Stopping');
-	SET @Goodnighting_Id =	(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Goodnighting');
-	SET @Clearing_Id =		(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Clearing');
+	DECLARE	@Starting_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Starting');
+	DECLARE	@Stopping_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping');
+	DECLARE @Goodnighting_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Goodnighting');
+	DECLARE	@Clearing_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Clearing');
+	DECLARE @Grace_period_Minute INT = 5; -- this value is subject to possible modification
 
 	-- Flag only the events that keep "ing" for 5 min after the ending time
-	UPDATE [dbo].[Event]
-	SET [EventStatusId] = @Clearing_Id	
-			,[SourceAcknowledgement] = 0
-			,[DestinationAcknowledgement] = 0					
-	WHERE @Grace_period_Minute < DATEDIFF(MINUTE, [EndTime], CURRENT_TIMESTAMP) AND [EventStatusId] IN (@Stopping_Id, @Starting_Id, @Goodnighting_Id)
+	UPDATE [dbo].[Event] SET 
+		[EventStatusId] = @Clearing_Id,	
+		[SourceAcknowledgement] = 0,
+		[DestinationAcknowledgement] = 0
+	WHERE @Grace_period_Minute < DATEDIFF(MINUTE, [EndTime], CURRENT_TIMESTAMP) 
+		AND [EventStatusId] IN (@Stopping_Id, @Starting_Id, @Goodnighting_Id)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Event_GetStoppingListByHostId]    Script Date: 09/07/2017 14:14:24 ******/
@@ -4455,55 +4235,45 @@ CREATE PROCEDURE [dbo].[Event_GetStoppingListByHostId]
 
 AS
 BEGIN
-	DECLARE	@Stopping_Id INT;
-	DECLARE @Goodnighting_Id INT;
-	SET @Stopping_Id =		(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Stopping');
-	SET @Goodnighting_Id =	(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Goodnighting');
+	DECLARE	@Stopping_Id INT =	(SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping');
+	DECLARE @Goodnighting_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Goodnighting');
 
 
-	SELECT [Id]							-- 0
-      , [Name]							-- 1
-      , [CompanyId]						-- 2
-      , [SourceDeviceId]					-- 3
-      , [DestinationDeviceId]			-- 4
-      , [StartTime]						-- 5
-      , [EndTime]						-- 6
-      , [CreatorId]						-- 7
-      , [CreatedOn]						-- 9
-      , [VideoProfileId]					--10
-      , [ParentId]						--11
-      , [RTT]							--12
-      , [PLEClientStreamConfigId]		--13
-      , [PLEServerStreamId]				--14
-      , [PLEServerConfigId]				--15
-      , [InputStreamId]					--16
-      , [OutputStreamId]					--17
-      , DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond	--18
-      , CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond		--19
-      , [SourceAcknowledgement]			--20
-      , [DestinationAcknowledgement]		--21
-      , [EventStatusId]						--22
-      , [VBitRate]						--23
-      , [AudioChannels]					--24
-      , [OwnerId]						--25
-      , [ActualStarted]					--26
-      , [ActualEnded]					--27
-      , [ClosedCaption]					--28
-      , [SerialNumber]					--29
-      , [Tx]								--30
-      , [Rx]
-	--31
-	FROM [Event]
-	WHERE	([PLEClientStreamConfigId]	IN (SELECT Id
-		FROM [PLEClientStreamConfig]
-		WHERE HostId=@HostId)
-		OR [PLEServerStreamId]			IN (SELECT Id
-		FROM [PLEServerStream]
-		WHERE HostId=@HostId))
+	SELECT 
+		[Id],							-- 0
+		[Name],							-- 1
+		[CompanyId],						-- 2
+		[SourceDeviceId],					-- 3
+		[DestinationDeviceId],			-- 4
+		[StartTime],						-- 5
+		[EndTime],						-- 6
+		[CreatorId],						-- 7
+		[CreatedOn],						-- 9
+		[VideoProfileId],					--10
+		[ParentId],						--11
+		[RTT],							--12
+		[PLEClientStreamConfigId],		--13
+		[PLEServerStreamId],				--14
+		[PLEServerConfigId],				--15
+		[InputStreamId],					--16
+		[OutputStreamId],					--17
+		DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond,	--18
+		CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond,		--19
+		[SourceAcknowledgement],			--20
+		[DestinationAcknowledgement],		--21
+		[EventStatusId],						--22
+		[VBitRate],						--23
+		[AudioChannels],					--24
+		[OwnerId],						--25
+		[ActualStarted],					--26
+		[ActualEnded],					--27
+		[ClosedCaption],					--28
+		[SerialNumber],					--29
+		[Tx],								--30
+		[Rx]	--31
+	FROM [dbo].[Event]
+	WHERE ([PLEClientStreamConfigId] IN (SELECT [Id] FROM [PLEClientStreamConfig] WHERE [HostId]=@HostId)
+				OR [PLEServerStreamId] IN (SELECT [Id] FROM [PLEServerStream] WHERE [HostId]=@HostId))
 		AND ([EventStatusId]=@Stopping_Id OR [EventStatusId]=@Goodnighting_Id)
 	ORDER BY [StartTime]
 
@@ -4525,51 +4295,43 @@ CREATE PROCEDURE [dbo].[Event_GetStartingListByHostId]
 AS
 BEGIN
 
-	DECLARE	@Starting_Id INT;
-	SET @Starting_Id = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Starting');
+	DECLARE	@Starting_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Starting');
 
-
-	SELECT [Id]							-- 0
-      , [Name]							-- 1
-      , [CompanyId]						-- 2
-      , [SourceDeviceId]					-- 3
-      , [DestinationDeviceId]			-- 4
-      , [StartTime]						-- 5
-      , [EndTime]						-- 6
-      , [CreatorId]						-- 7
-      , [CreatedOn]						-- 9
-      , [VideoProfileId]					--10
-      , [ParentId]						--11
-      , [RTT]							--12
-      , [PLEClientStreamConfigId]		--13
-      , [PLEServerStreamId]				--14
-      , [PLEServerConfigId]				--15
-      , [InputStreamId]					--16
-      , [OutputStreamId]					--17
-      , DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond	--18
-      , CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond		--19
-      , [SourceAcknowledgement]			--20
-      , [DestinationAcknowledgement]		--21
-      , [EventStatusId]						--22
-      , [VBitRate]						--23
-      , [AudioChannels]					--24
-      , [OwnerId]						--25
-      , [ActualStarted]					--26
-      , [ActualEnded]					--27
-      , [ClosedCaption]					--28
-      , [SerialNumber]					--29
-      , [Tx]								--30
-      , [Rx]
-	--31
-	FROM [Event]
-	WHERE	([PLEClientStreamConfigId]	IN (SELECT Id
-		FROM [PLEClientStreamConfig]
-		WHERE HostId=@HostId)
-		OR [PLEServerStreamId]			IN (SELECT Id
-		FROM [PLEServerStream]
-		WHERE HostId=@HostId))
+	SELECT 
+		[Id],							-- 0
+		[Name],							-- 1
+		[CompanyId],						-- 2
+		[SourceDeviceId],					-- 3
+		[DestinationDeviceId],			-- 4
+		[StartTime],						-- 5
+		[EndTime],						-- 6
+		[CreatorId],						-- 7
+		[CreatedOn],						-- 9
+		[VideoProfileId],					--10
+		[ParentId],						--11
+		[RTT],							--12
+		[PLEClientStreamConfigId],		--13
+		[PLEServerStreamId],				--14
+		[PLEServerConfigId],				--15
+		[InputStreamId],					--16
+		[OutputStreamId],					--17
+		DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond,	--18
+		CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond,		--19
+		[SourceAcknowledgement],			--20
+		[DestinationAcknowledgement],		--21
+		[EventStatusId],						--22
+		[VBitRate],						--23
+		[AudioChannels],					--24
+		[OwnerId],						--25
+		[ActualStarted],					--26
+		[ActualEnded],					--27
+		[ClosedCaption],					--28
+		[SerialNumber],					--29
+		[Tx],								--30
+		[Rx]								--31
+	FROM [dbo].[Event] 
+	WHERE ([PLEClientStreamConfigId] IN (SELECT [Id] FROM [dbo].[PLEClientStreamConfig]	WHERE [HostId]=@HostId)
+				OR [PLEServerStreamId] IN (SELECT [Id] FROM [dbo].[PLEServerStream] WHERE [HostId]=@HostId))
 		AND [EventStatusId]= @Starting_Id
 	ORDER BY [StartTime]
 
@@ -4591,56 +4353,46 @@ CREATE PROCEDURE [dbo].[Event_GetStartedListByHostId]
 AS
 BEGIN
 
-	DECLARE	@Started_Id INT;
-	DECLARE	@Stopping_Id INT;
-	SET @Started_Id = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Started');
-	SET @Stopping_Id = (SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Stopping');
+	DECLARE	@Started_Id INT = (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Started');
+	DECLARE	@Stopping_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping');
 
-
-	SELECT [Id]							-- 0
-      , [Name]							-- 1
-      , [CompanyId]						-- 2
-      , [SourceDeviceId]					-- 3
-      , [DestinationDeviceId]			-- 4
-      , [StartTime]						-- 5
-      , [EndTime]						-- 6
-      , [CreatorId]						-- 7
-      , [CreatedOn]						-- 9
-      , [VideoProfileId]					--10
-      , [ParentId]						--11
-      , [RTT]							--12
-      , [PLEClientStreamConfigId]		--13
-      , [PLEServerStreamId]				--14
-      , [PLEServerConfigId]				--15
-      , [InputStreamId]					--16
-      , [OutputStreamId]					--17
-      , DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond	--18
-      , CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond		--19
-      , [SourceAcknowledgement]			--20
-      , [DestinationAcknowledgement]		--21
-      , [EventStatusId]						--22
-      , [VBitRate]						--23
-      , [AudioChannels]					--24
-      , [OwnerId]						--25
-      , [ActualStarted]					--26
-      , [ActualEnded]					--27
-      , [ClosedCaption]					--28
-      , [SerialNumber]					--29
-      , [Tx]								--30
-      , [Rx]
-	--31
-	FROM [Event]
-	WHERE	([PLEClientStreamConfigId]	IN (SELECT Id
-		FROM [PLEClientStreamConfig]
-		WHERE HostId=@HostId)
-		OR [PLEServerStreamId]		IN (SELECT Id
-		FROM [PLEServerStream]
-		WHERE HostId=@HostId))
-		AND [EventStatusId]=@Started_Id AND ([EndTime] IS NULL OR [EndTime]>CURRENT_TIMESTAMP)
+	SELECT 
+		[Id],							-- 0
+		[Name],							-- 1
+		[CompanyId],						-- 2
+		[SourceDeviceId],					-- 3
+		[DestinationDeviceId],			-- 4
+		[StartTime],						-- 5
+		[EndTime],						-- 6
+		[CreatorId],						-- 7
+		[CreatedOn],						-- 9
+		[VideoProfileId],					--10
+		[ParentId],						--11
+		[RTT],							--12
+		[PLEClientStreamConfigId],		--13
+		[PLEServerStreamId],				--14
+		[PLEServerConfigId],				--15
+		[InputStreamId],					--16
+		[OutputStreamId],					--17
+		DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond,	--18
+		CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond,		--19
+		[SourceAcknowledgement],			--20
+		[DestinationAcknowledgement],		--21
+		[EventStatusId],						--22
+		[VBitRate],						--23
+		[AudioChannels],					--24
+		[OwnerId],						--25
+		[ActualStarted],					--26
+		[ActualEnded],					--27
+		[ClosedCaption],					--28
+		[SerialNumber],					--29
+		[Tx],								--30
+		[Rx]								--31
+	FROM [dbo].[Event]
+	WHERE ([PLEClientStreamConfigId] IN (SELECT [Id] FROM [dbo].[PLEClientStreamConfig] WHERE HostId=@HostId)
+				OR [PLEServerStreamId]	IN (SELECT [Id] FROM [dbo].[PLEServerStream] WHERE HostId=@HostId))
+		AND [EventStatusId]=@Started_Id 
+		AND ([EndTime] IS NULL OR [EndTime]>CURRENT_TIMESTAMP)
 	ORDER BY [StartTime]
 END
 GO
@@ -4659,52 +4411,44 @@ CREATE PROCEDURE [dbo].[Event_GetClearingListByHostId]
 
 AS
 BEGIN
+	DECLARE @Clearing_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Clearing');
 
-	DECLARE @Clearing_Id INT;
-	SET @Clearing_Id =		(SELECT [Id]
-	FROM [dbo].[EventStatus]
-	WHERE [Name] = 'Clearing');
-
-
-	SELECT [Id]							-- 0
-      , [Name]							-- 1
-      , [CompanyId]						-- 2
-      , [SourceDeviceId]					-- 3
-      , [DestinationDeviceId]			-- 4
-      , [StartTime]						-- 5
-      , [EndTime]						-- 6
-      , [CreatorId]						-- 7
-      , [CreatedOn]						-- 9
-      , [VideoProfileId]					--10
-      , [ParentId]						--11
-      , [RTT]							--12
-      , [PLEClientStreamConfigId]		--13
-      , [PLEServerStreamId]				--14
-      , [PLEServerConfigId]				--15
-      , [InputStreamId]					--16
-      , [OutputStreamId]					--17
-      , DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond	--18
-      , CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond		--19
-      , [SourceAcknowledgement]			--20
-      , [DestinationAcknowledgement]		--21
-      , [EventStatusId]						--22
-      , [VBitRate]						--23
-      , [AudioChannels]					--24
-      , [OwnerId]						--25
-      , [ActualStarted]					--26
-      , [ActualEnded]					--27
-      , [ClosedCaption]					--28
-      , [SerialNumber]					--29
-      , [Tx]								--30
-      , [Rx]
+	SELECT 
+		[Id],							-- 0
+		[Name],							-- 1
+		[CompanyId],						-- 2
+		[SourceDeviceId],					-- 3
+		[DestinationDeviceId],			-- 4
+		[StartTime],						-- 5
+		[EndTime],						-- 6
+		[CreatorId],						-- 7
+		[CreatedOn],						-- 9
+		[VideoProfileId],					--10
+		[ParentId],						--11
+		[RTT],							--12
+		[PLEClientStreamConfigId],		--13
+		[PLEServerStreamId],				--14
+		[PLEServerConfigId],				--15
+		[InputStreamId],					--16
+		[OutputStreamId],					--17
+		DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond,	--18
+		CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond,		--19
+		[SourceAcknowledgement],			--20
+		[DestinationAcknowledgement],		--21
+		[EventStatusId],						--22
+		[VBitRate],						--23
+		[AudioChannels],					--24
+		[OwnerId],						--25
+		[ActualStarted],					--26
+		[ActualEnded],					--27
+		[ClosedCaption],					--28
+		[SerialNumber],					--29
+		[Tx],								--30
+		[Rx]
 	--31
-	FROM [Event]
-	WHERE	([PLEClientStreamConfigId]	IN (SELECT Id
-		FROM [PLEClientStreamConfig]
-		WHERE HostId=@HostId)
-		OR [PLEServerStreamId]		IN (SELECT Id
-		FROM [PLEServerStream]
-		WHERE HostId=@HostId))
+	FROM [dbo].[Event]
+	WHERE ([PLEClientStreamConfigId] IN (SELECT [Id] FROM [dbo].[PLEClientStreamConfig] WHERE [HostId]=@HostId)
+				OR [PLEServerStreamId]	IN (SELECT [Id] FROM [dbo].[PLEServerStream] WHERE HostId=@HostId))
 		AND [EventStatusId]=@Clearing_Id
 	ORDER BY [StartTime]
 
