@@ -1,55 +1,55 @@
 USE [SchedulerProduction]
 GO
 -- Country   *******************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedCountry.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedCountry.sql
 
 -- State   *******************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedState.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedState.sql
 
 -- Image  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedImage.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedImage.sql
 
 -- Address *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedAddress.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedAddress.sql
 
 -- RoleType  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedRoleType.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedRoleType.sql
 
 -- DCLINC Company  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedCompany.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedCompany.sql
 
 -- Status  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedEventStatus.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedEventStatus.sql
 
 -- Scope  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedScope.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedScope.sql
 
 -- Configuration  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedConfiguration.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedConfiguration.sql
 
 -- DateFormat  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedDateFormat.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedDateFormat.sql
 
 -- DateFormat  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedButton.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedButton.sql
 
 -- EventAction  *********************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedEventAction.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedEventAction.sql
 
 -- Page  ****************************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedPage.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedPage.sql
 
 -- Grid  ****************************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedGrid.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedGrid.sql
 
 -- Monitor Status  ****************************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedMonitorStatus.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedMonitorStatus.sql
 
 -- Role Company  ****************************************************************************************************************************
-:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedRoleCompany.sql
+:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedRoleCompany.sql
 
 -- Video profile  ****************************************************************************************************************************
---:r F:\SQL\SchedulerProduction\MigrationScripts\Seed\SeedVideoProfile.sql NO need
+--:r C:\Users\Harry\Desktop\Ron\NewSchedulerScripts\MigrationScripts\Seed\SeedVideoProfile.sql NO need
 
 
 

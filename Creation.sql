@@ -1,3 +1,5 @@
+USE [SchedulerProduction]
+GO
 -- These scripts create the tables
 
 CREATE TABLE [dbo].[Address] (
@@ -447,7 +449,7 @@ CREATE TABLE [dbo].[User] (
 	[Password]					VARCHAR(50)			NOT NULL,
 	[PersonId]					UNIQUEIDENTIFIER	NOT NULL,
 	[CompanyId]					UNIQUEIDENTIFIER	NOT NULL,
-	[Registered]				DATETIME			NOT NULL,
+	[RegisteredOn]				DATETIME			NOT NULL,
 	[PageId]					UNIQUEIDENTIFIER,
 	[DateFormatId]				UNIQUEIDENTIFIER	NOT NULL,
 	[Enabled]					BIT					NOT NULL,
@@ -487,6 +489,8 @@ CREATE TABLE [dbo].[VideoProfile] (
 	[SdiVideoMode]				VARCHAR(50)			NOT NULL,
 	[Value]						VARCHAR(50)			NOT NULL,
 );
+
+GO
 
 
 

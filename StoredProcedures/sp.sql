@@ -12,7 +12,10 @@ CREATE PROCEDURE [dbo].[Configuration_Update]
 	@StringValue VARCHAR(50)
 AS
 BEGIN
-	UPDATE [dbo].[Configuration] SET IntValue=@IntValue, StringValue=@StringValue WHERE Id=@Id
+	UPDATE [dbo].[Configuration] SET 
+		[IntValue]=@IntValue, 
+		[StringValue]=@StringValue 
+	WHERE [Id]=@Id
 END
 GO
 /****** Object:  StoredProcedure [dbo].[EventStatus_GetMonitorList]    Script Date: 09/07/2017 14:00:15 ******/
@@ -28,10 +31,7 @@ GO
 CREATE PROCEDURE [dbo].[EventStatus_GetMonitorList]
 AS
 BEGIN
-	SELECT *
-	FROM [EventStatus]
-	WHERE [Name] IN ('Starting', 'Started', 'Stopping')
-	ORDER BY [Id]
+	SELECT * FROM [EventStatus]	WHERE [Name] IN ('Starting', 'Started', 'Stopping')	ORDER BY [Id]
 END
 GO
 /****** Object:  StoredProcedure [dbo].[EventStatus_GetList]    Script Date: 09/07/2017 14:00:15 ******/
@@ -48,9 +48,7 @@ CREATE PROCEDURE [dbo].[EventStatus_GetList]
 
 AS
 BEGIN
-	SELECT *
-	FROM [EventStatus]
-	WHERE [Id] > 0
+	SELECT * FROM [dbo].[EventStatus] WHERE [Id] > 0
 	-- Show all the status but Id = 0 -> 'All'. Is used in the scheduler to show all the status in the table
 	ORDER BY [Id]
 END
@@ -75,27 +73,22 @@ CREATE PROCEDURE [dbo].[Host_InsertUpdateByLicenseKey]
 	@LastCheckin DATETIME
 AS
 BEGIN
-	IF NOT EXISTS(SELECT *
-	FROM Host
-	WHERE LicenseKey=@LicenseKey)
-	BEGIN
-		INSERT INTO Host
-			(
-			[Name],
-			[SerialNumber],
-			[CompanyId],
-			[LicenseKey],
-			[IPAddress],
-			[MacAddress],
-			[Version],
-			[TunnelIP],
-			[ApiPort],
-			[ApiPassword],
-			[LanIPAddress],
-			[LastCheckin]
-			)
-		VALUES
-			(
+	IF NOT EXISTS(SELECT * FROM [dbo].[Host] WHERE [LicenseKey]=@LicenseKey)
+		BEGIN
+			INSERT INTO [dbo].[Host](
+				[Name],
+				[SerialNumber],
+				[CompanyId],
+				[LicenseKey],
+				[IPAddress],
+				[MacAddress],
+				[Version],
+				[TunnelIP],
+				[ApiPort],
+				[ApiPassword],
+				[LanIPAddress],
+				[LastCheckin])
+			VALUES(
 				@Name,
 				@SerialNumber,
 				@CompanyId,
@@ -107,29 +100,26 @@ BEGIN
 				@ApiPort,
 				@ApiPassword,
 				@LanIPAddress,
-				@LastCheckIn
-		)
-	END
+				@LastCheckIn)
+		END
 	ELSE
-	BEGIN
-		UPDATE [dbo].[Host] SET
-			[Name]=@Name, 
-			[SerialNumber]=@SerialNumber, 
-			[CompanyId]=@CompanyId, 
-			[IPAddress]=@IPAddress, 
-			[MacAddress]=@MacAddress, 
-			[Version]=@Version,
-			[TunnelIP]=@TunnelIP,
-			[ApiPassword]= @ApiPassword,
-			[ApiPort]= @ApiPort,
-			[LanIPAddress]= @LanIPAddress,
-			[LastCheckIn]= @LastCheckIn
-		WHERE [LicenseKey]=@LicenseKey
+		BEGIN
+			UPDATE [dbo].[Host] SET
+				[Name]=@Name, 
+				[SerialNumber]=@SerialNumber, 
+				[CompanyId]=@CompanyId, 
+				[IPAddress]=@IPAddress, 
+				[MacAddress]=@MacAddress, 
+				[Version]=@Version,
+				[TunnelIP]=@TunnelIP,
+				[ApiPassword]= @ApiPassword,
+				[ApiPort]= @ApiPort,
+				[LanIPAddress]= @LanIPAddress,
+				[LastCheckIn]= @LastCheckIn
+			WHERE [LicenseKey]=@LicenseKey
+		END
+		SELECT [Id] FROM [dbo].[Host] WHERE [LicenseKey]=@LicenseKey
 	END
-	SELECT [Id]
-	FROM [dbo].[Host]
-	WHERE [LicenseKey]=@LicenseKey
-END
 GO
 /****** Object:  StoredProcedure [dbo].[Button_InsertUpdate]    Script Date: 09/07/2017 14:00:15 ******/
 SET ANSI_NULLS ON
@@ -164,10 +154,10 @@ BEGIN
 								[ImageId],
 								[IsHome])
 							VALUES(
-									@Id,
-									@Name,
-									@ImageId,
-									@IsHome)
+								@Id,
+								@Name,
+								@ImageId,
+								@IsHome)
 
 						IF @IsHome=1
 							UPDATE [dbo].[Button] SET IsHome=0 WHERE Id<>@Id
@@ -214,17 +204,16 @@ BEGIN
 				SELECT 1 AS Successful
 			ELSE
 				BEGIN
-					INSERT INTO [dbo].[RoleCompany]
-						(
+					INSERT INTO [dbo].[RoleCompany](
 						[Id],
 						[Name],
 						[CompanyId],
 						[RoleTypeId])
 					VALUES(
-							@Id,
-							@Name,
-							@CompanyId,
-							@RoleTypeId)
+						@Id,
+						@Name,
+						@CompanyId,
+						@RoleTypeId)
 					SELECT 0 AS Successful
 				END
 		END
@@ -240,41 +229,20 @@ CREATE PROCEDURE [dbo].[Scope_GetListByCompanyIdGridButtonId]
 	@GridButtonId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageUrl VARCHAR(100)
-	SELECT @PageUrl=[Url]
-	FROM [dbo].[Page]
-	WHERE [Id]=(SELECT [PageId]
-	FROM [dbo].[PageButton]
-	WHERE [Id]=@GridButtonId)
-	SELECT [Id],
+	DECLARE @PageUrl VARCHAR(100) = (SELECT [Url] FROM [dbo].[Page] WHERE [Id]=(SELECT [PageId] FROM [dbo].[PageButton] WHERE [Id]=@GridButtonId))
+	SELECT 
+		[Id],
 		[Name],
 		[Value]
 	FROM [dbo].[Scope]
-	WHERE (((SELECT [Id]
-		FROM [dbo].[Company]
-		WHERE [IsMaster]=1)=@CompanyId) OR [Value]<>(SELECT MAX([Value])
-		FROM [dbo].[Scope]))
-		AND ([Value]<>1 OR (@PageUrl='Monitor.aspx') OR (@PageUrl='Scheduling.aspx'))
+	WHERE (((SELECT [Id] FROM [dbo].[Company] WHERE [IsMaster]=1)=@CompanyId) 
+				OR [Value]<>(SELECT MAX([Value]) FROM [dbo].[Scope]))
+		AND ([Value]<>1 
+				OR (@PageUrl='Monitor.aspx') 
+				OR (@PageUrl='Scheduling.aspx'))
 	ORDER BY [Value]
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Role_RemoveObject]    Script Date: 09/07/2017 14:00:15 ******/
--- this needs to be modified for every table*****************************************************************************************************
-/*
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[Role_RemoveObject]
-	@ObjectId	UNIQUEIDENTIFIER,
-	@RoleCompanyId UNIQUEIDENTIFIER
-AS
-BEGIN
-	DELETE RoleObjectScope WHERE ObjectId=@ObjectId AND RoleCompanyId=@RoleCompanyId
-END
-GO
-*/
--- this will be removed *****************************************************************************************************
 /****** Object:  StoredProcedure [dbo].[Role_RemoveBrand]    Script Date: 09/07/2017 14:00:15 ******/
 SET ANSI_NULLS ON
 GO
@@ -290,10 +258,10 @@ CREATE PROCEDURE [dbo].[Role_RemoveBrand]
 	@RoleCompanyId 	UNIQUEIDENTIFIER
 AS
 BEGIN
-	DELETE BrandRoleScope WHERE BrandId=@PageButtonId AND RoleCompanyId=@RoleCompanyId
+	DELETE [dbo].[BrandRoleScope] WHERE [BrandId]=@BrandId AND [RoleCompanyId]=@RoleCompanyId
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Role_RemoveGridButton]    Script Date: 09/07/2017 14:00:15 ******/
+/****** Object:  StoredProcedure [dbo].[GridButtonRoleScope_RemoveRole]    Script Date: 09/07/2017 14:00:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -303,15 +271,15 @@ GO
 -- Create date: 		9-15-2017
 -- Description:			Removes a gridbutton from role-scope
 -- =============================================
-CREATE PROCEDURE [dbo].[Role_RemoveGridButton]
+CREATE PROCEDURE [dbo].[GridButtonRoleScope_RemoveRole]
 	@GridButtonId	UNIQUEIDENTIFIER,
 	@RoleCompanyId 	UNIQUEIDENTIFIER
 AS
 BEGIN
-	DELETE GridButtonRoleScope WHERE GridButtonId=@PageButtonId AND RoleCompanyId=@RoleCompanyId
+	DELETE [dbo].[GridButtonRoleScope] WHERE [GridButtonId]=@GridButtonId AND [RoleCompanyId]=@RoleCompanyId
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Role_RemovePageButton]    Script Date: 09/07/2017 14:00:15 ******/
+/****** Object:  StoredProcedure [dbo].[PageButtonRoleScope_RemoveRole]    Script Date: 09/07/2017 14:00:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -321,15 +289,15 @@ GO
 -- Create date: 		9-15-2017
 -- Description:			Removes a pagebutton from role-scope
 -- =============================================
-CREATE PROCEDURE [dbo].[Role_RemovePageButton]
+CREATE PROCEDURE [dbo].[PageButtonRoleScope_RemoveRole]
 	@PageButtonId	UNIQUEIDENTIFIER,
 	@RoleCompanyId 	UNIQUEIDENTIFIER
 AS
 BEGIN
-	DELETE PageButtonRoleScope WHERE PageButtonId=@PageButtonId AND RoleCompanyId=@RoleCompanyId
+	DELETE [dbo].[PageButtonRoleScope] WHERE [PageButtonId]=@PageButtonId AND [RoleCompanyId]=@RoleCompanyId
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Role_RemoveMenuItem]    Script Date: 09/07/2017 14:00:15 ******/
+/****** Object:  StoredProcedure [dbo].[MenuItemRoleScope_RemoveRole]    Script Date: 09/07/2017 14:00:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -339,7 +307,7 @@ GO
 -- Create date: 		9-15-2017
 -- Description:			Removes a menuitem from role-scope
 -- =============================================
-CREATE PROCEDURE [dbo].[Role_RemoveMenuItem]
+CREATE PROCEDURE [dbo].[MenuItemRoleScope_RemoveRole]
 	@MenuItemId		UNIQUEIDENTIFIER,
 	@RoleCompanyId 	UNIQUEIDENTIFIER
 AS
@@ -347,7 +315,7 @@ BEGIN
 	DELETE [dbo].[MenuItemRoleScope] WHERE [MenuItemId]=@MenuItemId AND [RoleCompanyId]=@RoleCompanyId
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Role_RemovePage]    Script Date: 09/07/2017 14:00:15 ******/
+/****** Object:  StoredProcedure [dbo].[PageRoleScope_RemoveRole]    Script Date: 09/07/2017 14:00:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -357,7 +325,7 @@ GO
 -- Create date: 		9-15-2017
 -- Description:			Removes a page from role-scope
 -- =============================================
-CREATE PROCEDURE [dbo].[Role_RemovePage]
+CREATE PROCEDURE [dbo].[PageRoleScope_RemoveRole]
 	@PageId			UNIQUEIDENTIFIER,
 	@RoleCompanyId 	UNIQUEIDENTIFIER
 AS
@@ -365,27 +333,44 @@ BEGIN
 	DELETE [dbo].[PageRoleScope] WHERE [PageId]=@PageId AND [RoleCompanyId]=@RoleCompanyId
 END
 GO
-/****** Object:  StoredProcedure [dbo].[PageButtonRoleScope_UpdateByRoleIdGridButtonIdScopeId]    Script Date: 09/07/2017 14:00:15 ******/
+/****** Object:  StoredProcedure [dbo].[BrandRoleScope_RemoveRole]    Script Date: 09/07/2017 14:00:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PageButtonRoleScope_UpdateByRoleIdGridButtonIdScopeId]
+-- =============================================
+-- Author:				Ronny Alfonso
+-- Create date: 		9-15-2017
+-- Description:			Removes a page from role-scope
+-- =============================================
+CREATE PROCEDURE [dbo].[BrandRoleScope_RemoveRole]
+	@BrandId			UNIQUEIDENTIFIER,
+	@RoleCompanyId 	UNIQUEIDENTIFIER
+AS
+BEGIN
+	DELETE [dbo].[BrandRoleScope] WHERE [BrandId]=@BrandId AND [RoleCompanyId]=@RoleCompanyId
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GridButtonRoleScope_UpdateByRoleIdGridButtonIdScopeId]    Script Date: 09/07/2017 14:00:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GridButtonRoleScope_UpdateByRoleIdGridButtonIdScopeId]
 	@Id UNIQUEIDENTIFIER,
 	@GridButtonId UNIQUEIDENTIFIER,
 	@ScopeId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DELETE [dbo].[PageButtonRoleScope] WHERE [RoleCompanyId]=@Id AND [PageButtonId]=@GridButtonId
-	INSERT INTO [dbo].[PageButtonRoleScope]
-		(
+	DELETE [dbo].[GridButtonRoleScope] WHERE [RoleCompanyId]=@Id AND [GridButtonId]=@GridButtonId
+	INSERT INTO [dbo].[GridButtonRoleScope](
 		[RoleCompanyId],
-		[PageButtonId],
+		[GridButtonId],
 		[ScopeId])
 	VALUES(
-			@Id,
-			@GridButtonId,
-			@ScopeId)
+		@Id,
+		@GridButtonId,
+		@ScopeId)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[PLEServerConfig_InsertUpdate_HostId_ConfigFileName]    Script Date: 09/07/2017 14:00:15 ******/
@@ -403,9 +388,7 @@ CREATE PROCEDURE [dbo].[PLEServerConfig_InsertUpdate_HostId_ConfigFileName]
 	@AltIPAddress VARCHAR(16)
 AS
 BEGIN
-	IF EXISTS(SELECT [Id]
-	FROM [dbo].[PLEServerConfig]
-	WHERE [HostId]=@HostId AND [ConfigFileName]=@ConfigFileName)
+	IF EXISTS(SELECT [Id] FROM [dbo].[PLEServerConfig] WHERE [HostId]=@HostId AND [ConfigFileName]=@ConfigFileName)
 	UPDATE [dbo].[PLEServerConfig] SET
 		[InputName]=@InputName,
 		[BindIP]=@BindIP,
@@ -416,8 +399,7 @@ BEGIN
 		[Deleted]=0
 	WHERE [HostId]=@HostId AND [ConfigFileName]=@ConfigFileName
 ELSE
-	INSERT INTO [dbo].[PLEServerConfig]
-		(
+	INSERT INTO [dbo].[PLEServerConfig](
 		[HostId],
 		[ConfigFileName],
 		[InputName],
@@ -425,8 +407,7 @@ ELSE
 		[Port],
 		[ModifiedOn],
 		[LanIPAddress],
-		[AltIPAddress]
-		)
+		[AltIPAddress])
 	VALUES(
 		@HostId,
 		@ConfigFileName,
@@ -435,8 +416,7 @@ ELSE
 		@Port,
 		CURRENT_TIMESTAMP,
 		@LanIPAddress,
-		@AltIPAddress
-	)
+		@AltIPAddress)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[PLEClientStreamConfig_InsertUpdate_HostId_ConfigFileName]    Script Date: 09/07/2017 14:00:15 ******/
@@ -475,8 +455,7 @@ BEGIN
 		[Deleted]=0
 	WHERE [HostId]=@HostId AND [ConfigFileName]=@ConfigFileName
 ELSE
-	INSERT INTO PLEClientStreamConfig
-		(
+	INSERT INTO PLEClientStreamConfig(
 		[HostId],
 		[ConfigFileName],
 		[InputName],
@@ -489,8 +468,7 @@ ELSE
 		[InputMulticast],
 		[InputMulticastIP],
 		[InputMulticastIFace],
-		[MultiIPAddress]
-		)
+		[MultiIPAddress])
 	VALUES(
 		@HostId,
 		@ConfigFileName,
@@ -504,8 +482,7 @@ ELSE
 		@InputMulticast,
 		@InputMulticastIP,
 		@InputMulticastIFace,
-		@MultiIPAddress
-	)
+		@MultiIPAddress)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Role_AddObject]    Script Date: 09/07/2017 14:00:15 ******/
@@ -527,6 +504,98 @@ BEGIN
 END
 GO
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+/****** Object:  StoredProcedure [dbo].[GridButton_AddRole]    Script Date: 09/07/2017 14:00:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:				Ronny Alfonso
+-- Create date:			9-21-2017
+-- Description:			Add a role to a gridbutton
+-- =============================================
+CREATE PROCEDURE [dbo].[GridButton_AddRole]
+	@GridButton	UNIQUEIDENTIFIER,
+	@RoleCompanyId UNIQUEIDENTIFIER
+AS
+BEGIN
+	INSERT INTO [dbo].[GridButtonRoleScope](
+		[RoleCompanyId], 
+		[GridButtonId])
+	VALUES(
+		@RoleCompanyId, 
+		@GridButton)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[PageButton_AddRole]    Script Date: 09/07/2017 14:00:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:				Ronny Alfonso
+-- Create date:			9-21-2017
+-- Description:			Add a role to a pagebutton
+-- =============================================
+CREATE PROCEDURE [dbo].[PageButton_AddRole]
+	@PageButton	UNIQUEIDENTIFIER,
+	@RoleCompanyId UNIQUEIDENTIFIER
+AS
+BEGIN
+	INSERT INTO [dbo].[PageButtonRoleScope](
+		[RoleCompanyId], 
+		[PageButtonId])
+	VALUES(
+		@RoleCompanyId, 
+		@PageButton)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[MenuItem_AddRole]    Script Date: 09/07/2017 14:00:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:				Ronny Alfonso
+-- Create date:			9-21-2017
+-- Description:			Add a role to a menuitem 
+-- =============================================
+CREATE PROCEDURE [dbo].[MenuItem_AddRole]
+	@MenuItem	UNIQUEIDENTIFIER,
+	@RoleCompanyId UNIQUEIDENTIFIER
+AS
+BEGIN
+	INSERT INTO [dbo].[MenuItemRoleScope](
+		[RoleCompanyId], 
+		[MenuItemId])
+	VALUES(
+		@RoleCompanyId, 
+		@MenuItem)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[Brand_AddRole]    Script Date: 09/07/2017 14:00:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:				Ronny Alfonso
+-- Create date:			9-21-2017
+-- Description:			Add a role to a Brand 
+-- =============================================
+CREATE PROCEDURE [dbo].[Brand_AddRole]
+	@Brand	UNIQUEIDENTIFIER,
+	@RoleCompanyId UNIQUEIDENTIFIER
+AS
+BEGIN
+	INSERT INTO [dbo].[BrandRoleScope](
+		[RoleCompanyId], 
+		[BrandId])
+	VALUES(
+		@RoleCompanyId, 
+		@Brand)
+END
+GO
 /****** Object:  StoredProcedure [dbo].[PageButton_DeleteById]    Script Date: 09/07/2017 14:00:15 ******/
 SET ANSI_NULLS ON
 GO
@@ -536,16 +605,52 @@ CREATE PROCEDURE [dbo].[PageButton_DeleteById]
 	@Id UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @ForGridUse BIT
 	DECLARE @Index INT
 	DECLARE @PageId UNIQUEIDENTIFIER
-	SELECT @PageId=PageId, @ForGridUse=ForGridUse, @Index=[Index] FROM PageButton WHERE Id=@Id
+	SELECT 
+		@PageId=[PageId], 
+		@Index=[Index] 
+	FROM [dbo].[PageButton] WHERE [Id]=@Id
 	BEGIN
 		BEGIN TRY
 			BEGIN TRANSACTION
 				DELETE [dbo].[PageButton] WHERE [Id]=@Id
-				UPDATE [dbo].[PageButton] SET [Index]=[Index]-1 WHERE [PageId]=@PageId AND [ForGridUse]=@ForGridUse AND [Index]>@Index
+				UPDATE [dbo].[PageButton] SET [Index]=[Index]-1 WHERE [PageId]=@PageId AND [Index]>@Index
 				DELETE [dbo].[PageButtonRoleScope] WHERE [PageButtonId]=@Id
+				SELECT 0 AS Successful
+			COMMIT TRANSACTION
+		END TRY
+		BEGIN CATCH
+			IF @@TRANCOUNT > 0
+				BEGIN
+					ROLLBACK TRANSACTION
+					SELECT -2 AS Successful
+				END
+		END CATCH
+	END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GridButton_DeleteById]    Script Date: 09/07/2017 14:00:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GridButton_DeleteById]
+	@Id UNIQUEIDENTIFIER
+AS
+BEGIN
+	DECLARE @Index INT
+	DECLARE @PageId UNIQUEIDENTIFIER
+	SELECT 
+		@PageId=[PageId], 
+		@Index=[Index] 
+	FROM [dbo].[GridButton] WHERE [Id]=@Id
+	BEGIN
+		BEGIN TRY
+			BEGIN TRANSACTION
+				DELETE [dbo].[GridButton] WHERE [Id]=@Id
+				UPDATE [dbo].[GridButton] SET [Index]=[Index]-1 WHERE [PageId]=@PageId AND [Index]>@Index
+				DELETE [dbo].[GirdButtonRoleScope] WHERE [GridButtonId]=@Id
 				SELECT 0 AS Successful
 			COMMIT TRANSACTION
 		END TRY
@@ -571,32 +676,34 @@ BEGIN
 	DECLARE @BrandId UNIQUEIDENTIFIER
 	SELECT @BrandId=[BrandId] FROM [dbo].[BrandUrl]	WHERE [Url]=@Url
 	IF @BrandId IS NOT NULL
-		SELECT [Id]
-		  , [Name]
-		  , [LoginBannerImageId]
-		  , [LoginTagImageId]
-		  , [PortalImageId]
-		  , [FaviconImageId]
-		  , [FooterCaption]
-		  , [IsDefault]
-		  , (SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[LoginBannerImageId]) AS LoginBannerURL
-		  , (SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[LoginTagImageId]) AS LoginTagURL
-		  , (SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[PortalImageId]) AS PortalImageURL
-		  , (SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[FaviconImageId]) AS FaviconURL
+		SELECT 
+			[Id],
+			[Name],
+			[LoginBannerImageId],
+			[LoginTagImageId],
+			[PortalImageId],
+			[FaviconImageId],
+			[FooterCaption],
+			[IsDefault],
+			(SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[LoginBannerImageId]) AS LoginBannerURL,
+			(SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[LoginTagImageId]) AS LoginTagURL,
+			(SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[PortalImageId]) AS PortalImageURL,
+			(SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[FaviconImageId]) AS FaviconURL
 		FROM [dbo].[Brand] WHERE [ID]=@BrandId
 	ELSE
-		SELECT [Id]
-		  , [Name]
-		  , [LoginBannerImageId]
-		  , [LoginTagImageId]
-		  , [PortalImageId]
-		  , [FaviconImageId]
-		  , [FooterCaption]
-		  , [IsDefault]
-		  , (SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[LoginBannerImageId]) AS LoginBannerURL
-		  , (SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[LoginTagImageId]) AS LoginTagURL
-		  , (SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[PortalImageId]) AS PortalImageURL
-		  , (SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[FaviconImageId]) AS FaviconURL
+		SELECT 
+			[Id],
+			[Name],
+		    [LoginBannerImageId],
+		    [LoginTagImageId],
+			[PortalImageId],
+			[FaviconImageId],
+			[FooterCaption],
+			[IsDefault],
+			(SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[LoginBannerImageId]) AS LoginBannerURL,
+			(SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[LoginTagImageId]) AS LoginTagURL,
+			(SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[PortalImageId]) AS PortalImageURL,
+			(SELECT [Url] FROM [dbo].[Images] WHERE [Id]=[dbo].[Brand].[FaviconImageId]) AS FaviconURL
 		FROM [dbo].[Brand] WHERE [IsDefault]=1
 END
 GO
@@ -618,7 +725,6 @@ AS
 BEGIN
 	IF NOT EXISTS(SELECT * FROM Brand WHERE Id=@Id)
 	BEGIN
-		DECLARE @SystemAdministratorId UNIQUEIDENTIFIER = (SELECT [Id] FROM RoleCompany	WHERE [Name] = '212B9E56-6AD4-4612-B294-309E000DC4F6')
 		BEGIN TRY
 			BEGIN TRANSACTION
 				INSERT INTO [dbo].[Brand](
@@ -626,7 +732,7 @@ BEGIN
 					[Name],
 					[LoginBannerImageId],
 					[LoginTagImageId],
-					[PortalImageId[, 
+					[PortalImageId], 
 					[FaviconImageId],
 					[FooterCaption],
 					[IsDefault])
@@ -645,7 +751,7 @@ BEGIN
 					[RoleCompanyId])
 				VALUES(
 					@Id,
-					@SystemAdministratorId)
+					[dbo].RoleType_AdministratorRoleID())
 			COMMIT TRANSACTION
 		END TRY
 		BEGIN CATCH
@@ -657,14 +763,14 @@ BEGIN
 		END CATCH
 	END
 	ELSE
-		UPDATE [dbo].[Brand]
-		SET [Name]=@Name
-		  ,[LoginBannerImageId]=@LoginBannerImageId
-		  ,[LoginTagImageId]=@LoginTagImageId
-		  ,[PortalImageId]=@PortalImageId
-		  ,[FaviconImageId]=@FaviconImageId
-		  ,[FooterCaption]=@FooterCaption
-		  ,[IsDefault]=@IsDefault
+		UPDATE [dbo].[Brand] SET 
+			[Name]=@Name,
+			[LoginBannerImageId]=@LoginBannerImageId,
+			[LoginTagImageId]=@LoginTagImageId,
+			[PortalImageId]=@PortalImageId,
+			[FaviconImageId]=@FaviconImageId,
+			[FooterCaption]=@FooterCaption,
+			[IsDefault]=@IsDefault
 		WHERE [Id]=@Id
 
 	IF @IsDefault=1
@@ -737,7 +843,6 @@ BEGIN
 		BEGIN
 			DECLARE @SystemAdministrator VARCHAR(50) = 'System Administrators'
 			DECLARE @Everyone VARCHAR(50) = 'Everyone'
-			DECLARE @SystemAdministratorRoleId UNIQUEIDENTIFIER = (SELECT [Id] FROM [RoleType] WHERE [Name] = @SystemAdministrator)
 			DECLARE @EveryoneId UNIQUEIDENTIFIER = (SELECT [Id] FROM [RoleType]	WHERE [Name] = @Everyone)
 			BEGIN TRY
 				BEGIN TRANSACTION
@@ -777,7 +882,7 @@ BEGIN
 						NEWID(),
 						@SystemAdministrator,
 						@Id,
-						@SystemAdministratorRoleId)
+						[dbo].RoleType_AdministratorRoleID())
 								
 					DECLARE @RoleCompanyId UNIQUEIDENTIFIER = NEWID()
 					INSERT INTO [dbo].[RoleCompany](
@@ -887,34 +992,35 @@ CREATE PROCEDURE [dbo].[OutputStream_ReadEncoderByHostIdDestinationPort]
 	@DestinationPort INT
 AS
 BEGIN
-	SELECT [Id]
-		  ,[HostId]
-		  ,[ConfigFileName]
-		  ,[StreamName]
-		  ,[StreamEnabled]
-		  ,[Outputformat]
-		  ,[VBitRate]
-		  ,[VideoTranscodeMethod]
-		  ,[VideoOutputFormat]
-		  ,[GopSize]
-		  ,[ScalingMode]
-		  ,[FrameRateMode]
-		  ,[Deinterlace]
-		  ,[TsRateControl]
-		  ,[TsBitRateMin]
-		  ,[TsBitRateMax]
-		  ,[AudioTranscodingType]
-		  ,[ABitRate]
-		  ,[ARate]
-		  ,[AudioChannels]
-		  ,[AProfile]
-		  ,[DestinationIP]
-		  ,[DestinationPort]
-		  ,[ModifiedOn]
-		  ,[OutputProto]
-		  ,[OutputMulticast]
-		  ,[OutputMulticastIFace]
-		  ,[Deleted]
+	SELECT 
+		[Id],
+		[HostId],
+		[ConfigFileName],
+		[StreamName],
+		[StreamEnabled],
+		[Outputformat],
+		[VBitRate],
+		[VideoTranscodeMethod],
+		[VideoOutputFormat],
+		[GopSize],
+		[ScalingMode],
+		[FrameRateMode],
+		[Deinterlace],
+		[TsRateControl],
+		[TsBitRateMin],
+		[TsBitRateMax],
+		[AudioTranscodingType],
+		[ABitRate],
+		[ARate],
+		[AudioChannels],
+		[AProfile],
+		[DestinationIP],
+		[DestinationPort],
+		[ModifiedOn],
+		[OutputProto],
+		[OutputMulticast],
+		[OutputMulticastIFace],
+		[Deleted]
 	FROM [dbo].[OutputStream] 
 	WHERE 
 		[HostId]=@HostId
@@ -1053,39 +1159,40 @@ CREATE PROCEDURE [dbo].[OutputStream_GetListByHostIdPLEConfigFileName]
 	@ConfigFileName VARCHAR(100)
 AS
 BEGIN
-	SELECT [Id]
-      , [HostId]
-      , [ConfigFileName]
-      , [StreamName]
-      , [StreamEnabled]
-      , [Outputformat]
-      , [VBitRate]
-      , [VideoTranscodeMethod]
-      , [VideoOutputFormat]
-      , [GopSize]
-      , [ScalingMode]
-      , [FrameRateMode]
-      , [Deinterlace]
-      , [TsRateControl]
-      , [TsBitRateMin]
-      , [TsBitRateMax]
-      , [AudioTranscodingType]
-      , [ABitRate]
-      , [ARate]
-      , [AudioChannels]
-      , [AProfile]
-      , [DestinationIP]
-      , [DestinationPort]
-      , [ModifiedOn]
-      , [OutputProto]
-      , [OutputMulticast]
-      , [OutputMulticastIFace]
-	FROM [OutputStream]
+	SELECT 
+		[Id],
+		[HostId],
+		[ConfigFileName],
+		[StreamName],
+		[StreamEnabled],
+		[Outputformat],
+		[VBitRate],
+		[VideoTranscodeMethod],
+		[VideoOutputFormat],
+		[GopSize],
+		[ScalingMode],
+		[FrameRateMode],
+		[Deinterlace],
+		[TsRateControl],
+		[TsBitRateMin],
+		[TsBitRateMax],
+		[AudioTranscodingType],
+		[ABitRate],
+		[ARate],
+		[AudioChannels],
+		[AProfile],
+		[DestinationIP],
+		[DestinationPort],
+		[ModifiedOn],
+		[OutputProto],
+		[OutputMulticast],
+		[OutputMulticastIFace]
+	FROM [dbo].[OutputStream]
 	WHERE [HostId]=@HostId 
 		AND [ConfigFileName] LIKE @ConfigFileName + '-%'
 		AND ([Outputformat] LIKE 'hdsdi%' OR [Outputformat] LIKE 'asi%')
 		AND [Deleted]=0
-	ORDER BY [dbo].[ConfigFileName]
+	ORDER BY [ConfigFileName]
 END
 GO
 /****** Object:  StoredProcedure [dbo].[InputStream_ReadDecoderByHostIdLocalPort]    Script Date: 09/07/2017 14:00:15 ******/
@@ -1098,23 +1205,24 @@ CREATE PROCEDURE [dbo].[InputStream_ReadDecoderByHostIdLocalPort]
 	@LocalPort INT
 AS
 BEGIN
-	SELECT [Id]
-		  , [HostId]
-		  , [ConfigFileName]
-		  , [InputName]
-		  , [SdiAspectRatio]
-		  , [SdiVideoMode]
-		  , [SdiAudioConf]
-		  , [ARate]
-		  , [AudioChannels]
-		  , [ModifiedOn]
-		  , [LocalIP]
-		  , [LocalPort]
-		  , [InputMulticast]
-		  , [InputMulticastIP]
-		  , [InputMulticastIFace]
-		  , [Deleted]
-	FROM [InputStream]
+	SELECT 
+		[Id],
+		[HostId],
+		[ConfigFileName],
+		[InputName],
+		[SdiAspectRatio],
+		[SdiVideoMode],
+		[SdiAudioConf],
+		[ARate],
+		[AudioChannels],
+		[ModifiedOn],
+		[LocalIP],
+		[LocalPort],
+		[InputMulticast],
+		[InputMulticastIP],
+		[InputMulticastIFace],
+		[Deleted]
+	FROM [dbo].[InputStream]
 	WHERE [HostId]=@HostId
 		AND LEFT([ConfigFileName], LEN('net_stream'))='net_stream' AND RIGHT([ConfigFileName], LEN('-config'))='-config'
 		AND [LocalPort]=@LocalPort
@@ -1310,39 +1418,39 @@ BEGIN
 						END
 					ELSE
 						BEGIN
-							DECLARE @SystemAdministratorId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[RoleCompany]	WHERE [Name] = 'System Administrators')
+							DECLARE @SystemAdministratorId UNIQUEIDENTIFIER = [dbo].RoleType_AdministratorRoleID()
 							BEGIN TRY
 								BEGIN TRANSACTION
 									DECLARE @Index INT
 									SELECT @Index=MAX([Index])+1 FROM [dbo].[MenuItem] WHERE [ParentId] IS NULL AND @ParentId IS NULL OR [ParentId]=@ParentId
 									IF @Index IS NULL
 										SET @Index=0
-										INSERT [dbo].[MenuItem](
-											[Id], 
-											[Name],
-											[ParentId],
-											[Title], 
-											[Index],
-											[ToolTip],
-											[ImageId],
-											[PageId])
-										VALUES(
-											@Id, 
-											@Name,
-											@ParentId,
-											@Title,
-											@Index,
-											@ToolTip,
-											@ImageId,
-											@PageId)
-											
-										INSERT INTO [dbo].[MenuItemRoleScope](
-											[MenuItemId], 
-											[RoleCompanyId])
-										VALUES(
-											@Id, 
-											@SystemAdministratorId)
-										SELECT 0 AS Successful	-- Insert successful
+									INSERT [dbo].[MenuItem](
+										[Id], 
+										[Name],
+										[ParentId],
+										[Title], 
+										[Index],
+										[ToolTip],
+										[ImageId],
+										[PageId])
+									VALUES(
+										@Id, 
+										@Name,
+										@ParentId,
+										@Title,
+										@Index,
+										@ToolTip,
+										@ImageId,
+										@PageId)
+										
+									INSERT INTO [dbo].[MenuItemRoleScope](
+										[MenuItemId], 
+										[RoleCompanyId])
+									VALUES(
+										@Id, 
+										@SystemAdministratorId)
+									SELECT 0 AS Successful	-- Insert successful
 								COMMIT TRANSACTION
 							END TRY
 							BEGIN CATCH
@@ -1364,14 +1472,15 @@ CREATE PROCEDURE [dbo].[MenuItems_GetParentList]
 AS
 BEGIN
 	DECLARE @RootMenuItemId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[MenuItem] WHERE [Name] = 'Root')
-	SELECT [Id]
-		, [Name]
-		, [ParentId]
-		, [Title]
-		, [Index]
-		, [ToolTip]
-		, [ImageId]
-		, [PageId]
+	SELECT 
+		[Id],
+		[Name],
+		[ParentId],
+		[Title],
+		[Index],
+		[ToolTip],
+		[ImageId],
+		[PageId]
 	FROM [dbo].[MenuItem]
 	WHERE [ParentId] IS NULL OR [ParentId]=@RootMenuItemId
 	ORDER BY [ParentId], [Index]
@@ -1513,20 +1622,21 @@ CREATE PROCEDURE [dbo].[PLEServerStream_GetListByHostIdPLEConfigFileName]
 	@ConfigFileName VARCHAR(100)
 AS
 BEGIN
-	SELECT [Id]
-		  , [HostId]
-		  , [ConfigFileName]
-		  , [StreamName]
-		  , [PLEServerIndex]
-		  , [StreamEnabled]
-		  , [DestinationIP]
-		  , [DestinationPort]
-		  , [ModifiedOn]
-		  , [OutputMulticast]
-		  , [OutputMulticastIP]
-		  , [OutputMulticastIFace]
-		  , [MultiIPAddress]
-	FROM [PLEServerStream]
+	SELECT 
+		[Id],
+		[HostId],
+		[ConfigFileName],
+		[StreamName],
+		[PLEServerIndex],
+		[StreamEnabled],
+		[DestinationIP],
+		[DestinationPort],
+		[ModifiedOn],
+		[OutputMulticast],
+		[OutputMulticastIP],
+		[OutputMulticastIFace],
+		[MultiIPAddress]
+	FROM [dbo].[PLEServerStream]
 	WHERE [HostId]=@HostId AND [ConfigFileName] LIKE REPLACE(@ConfigFileName, '-config', '') + '_stream_%' AND [Deleted]=0
 	ORDER BY [ConfigFileName]
 END
@@ -1571,7 +1681,6 @@ CREATE PROCEDURE [dbo].[PageButton_MoveUpDown]
 	@Up BIT
 AS
 BEGIN
-	DECLARE @ForGridUse BIT
 	DECLARE @Index INT
 	DECLARE @PageId UNIQUEIDENTIFIER
 	SELECT 
@@ -1586,7 +1695,6 @@ BEGIN
 					DECLARE @PrevId UNIQUEIDENTIFIER=(SELECT [Id] 
 														FROM [dbo].[PageButton] 
 														WHERE [PageId]=@PageId 
-															AND [ForGridUse]=@ForGridUse 
 															AND [Index]=@Index-1)
 					UPDATE [dbo].[PageButton] SET [Index]=@MaxIndexPlusOne WHERE [Id]=@Id
 					UPDATE [dbo].[PageButton] SET [Index]=[Index]+1 WHERE [Id]=@PrevId
@@ -1608,7 +1716,6 @@ BEGIN
 				BEGIN TRANSACTION
 					DECLARE @NextId UNIQUEIDENTIFIER
 					SELECT @NextId=[Id] FROM [dbo].[PageButton]	WHERE [PageId]=@PageId 
-																	AND [ForGridUse]=@ForGridUse 
 																	AND [Index]=@Index+1
 																	
 					UPDATE [dbo].[PageButton] SET [Index]=@MaxIndexPlusOne WHERE [Id]=@Id
@@ -1648,36 +1755,110 @@ BEGIN
 				BEGIN TRY
 					BEGIN TRANSACTION
 						DECLARE @Id UNIQUEIDENTIFIER = NEWID()
-						
-						DECLARE @SystemAdministratorRoleId UNIQUEIDENTIFIER = (SELECT [Id] FROM [RoleType] WHERE [Name] = 'System Administrators')
+						DECLARE @SystemAdministratorRoleId UNIQUEIDENTIFIER = [dbo].RoleType_AdministratorRoleID()
 						DECLARE @Index INT=(SELECT MAX([Index])+1 FROM [dbo].[PageButton] WHERE [PageId]=@PageId)
+
 						IF @Index IS NULL
 							SET @Index=0
-							INSERT INTO [dbo].[PageButton](
-								[Id],
-								[PageId],
-								[ButtonId],
-								[Index],
-								[ToolTip],
-								[RedirectPageId])
-							VALUES(
-								@Id,
-								@PageId,
-								@ButtonId,
-								@Index,
-								@ToolTip,
-								@RedirectPageId,
-								@ForGridUse)
-							IF @ForGridUse=0
-								INSERT INTO [dbo].[PageButtonRoleScope](
-									[PageButtonId], 
-									[RoleCompanyId])
-								SELECT 
-									@Id AS PageButtonId,
-									[Id] AS RoleCompanyId
-								FROM [dbo].[RoleCompany]
-								WHERE [CompanyId]=(SELECT [Id] FROM [dbo].[Company]	WHERE [IsMaster]=1) AND RoleTypeId=@SystemAdministratorRoleId 
-								SELECT 0 AS SUCCESSFUL
+						INSERT INTO [dbo].[PageButton](
+							[Id],
+							[PageId],
+							[ButtonId],
+							[Index],
+							[ToolTip],
+							[RedirectPageId])
+						VALUES(
+							@Id,
+							@PageId,
+							@ButtonId,
+							@Index,
+							@ToolTip,
+							@RedirectPageId)
+						INSERT INTO [dbo].[PageButtonRoleScope](
+							[PageButtonId], 
+							[RoleCompanyId])
+						SELECT 
+							@Id AS PageButtonId,
+							[Id] AS RoleCompanyId
+						FROM [dbo].[RoleCompany]
+						WHERE [CompanyId]=(SELECT [Id] FROM [dbo].[Company]	WHERE [IsMaster]=1) AND RoleTypeId=@SystemAdministratorRoleId 
+						SELECT 0 AS SUCCESSFUL
+					COMMIT TRANSACTION
+				END TRY
+				BEGIN CATCH
+					IF @@TRANCOUNT > 0
+						BEGIN
+							DECLARE @ErrorMessage NVARCHAR(4000);
+							DECLARE @ErrorSeverity INT;
+							DECLARE @ErrorState INT;
+
+							SELECT @ErrorMessage = ERROR_MESSAGE(),
+								@ErrorSeverity = ERROR_SEVERITY(),
+								@ErrorState = ERROR_STATE();
+
+							-- Use RAISERROR inside the CATCH block to return 
+							-- error information about the original error that 
+							-- caused execution to jump to the CATCH block.
+							RAISERROR (@ErrorMessage, -- Message text.
+							   @ErrorSeverity, -- Severity.
+							   @ErrorState -- State.
+							   );
+							ROLLBACK TRANSACTION
+							SELECT -2 AS SUCCESSFUL
+						END
+				END CATCH
+			END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GridButton_Insert]    Script Date: 09/07/2017 14:00:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GridButton_Insert]
+	@PageId UNIQUEIDENTIFIER,
+	@ButtonId UNIQUEIDENTIFIER,
+	@ToolTip VARCHAR(50),
+	@RedirectPageId UNIQUEIDENTIFIER = NULL
+AS
+BEGIN
+	IF @PageId IS NULL OR @PageId NOT IN (SELECT [Id] FROM [dbo].[Page])
+		SELECT 1 AS Successful
+	ELSE IF @ButtonId IS NULL OR @ButtonId NOT IN (SELECT [Id] FROM [dbo].[Button])
+			SELECT 2 AS SUCCESSFUL
+		ELSE
+			BEGIN
+				BEGIN TRY
+					BEGIN TRANSACTION
+						DECLARE @Id UNIQUEIDENTIFIER = NEWID()
+						DECLARE @SystemAdministratorRoleId UNIQUEIDENTIFIER = [dbo].RoleType_AdministratorRoleID()
+						DECLARE @Index INT=(SELECT MAX([Index])+1 FROM [dbo].[GridButton] WHERE [PageId]=@PageId)
+
+						IF @Index IS NULL
+							SET @Index=0
+						INSERT INTO [dbo].[GridButton](
+							[Id],
+							[PageId],
+							[ButtonId],
+							[Index],
+							[ToolTip],
+							[RedirectPageId])
+						VALUES(
+							@Id,
+							@PageId,
+							@ButtonId,
+							@Index,
+							@ToolTip,
+							@RedirectPageId)
+						INSERT INTO [dbo].[GridButtonRoleScope](
+							[GridButtonId], 
+							[RoleCompanyId])
+						SELECT 
+							@Id AS GridButtonId,
+							[Id] AS RoleCompanyId
+						FROM [dbo].[RoleCompany]
+						WHERE [CompanyId]=(SELECT [Id] FROM [dbo].[Company]	WHERE [IsMaster]=1) AND RoleTypeId=@SystemAdministratorRoleId 
+						SELECT 0 AS SUCCESSFUL
 					COMMIT TRANSACTION
 				END TRY
 				BEGIN CATCH
@@ -1725,7 +1906,7 @@ BEGIN
 		[Name],
 		[Value]
 	FROM [dbo].[Scope]
-	WHERE (((SELECT [Id] FROM [dbo].[Company] WHERE IsMaster=1)=(SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId))
+	WHERE (((SELECT [Id] FROM [dbo].[Company] WHERE [IsMaster]=1)=(SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId))
 						OR [Value]<>(SELECT MAX([Value]) FROM [dbo].[Scope]))
 			AND ([Value]<>1 OR (@PageUrl='Monitor.aspx') OR (@PageUrl='Scheduling.aspx'))
 	ORDER BY [Value]
@@ -1749,9 +1930,11 @@ BEGIN
 	ORDER BY [CompanyId], [RoleTypeId]
 END
 GO
+
+
 /****** Object:  StoredProcedure [dbo].[Role_GetListByObjectIdUserId]    Script Date: 09/07/2017 14:00:15 ******/
 -- needs to be fixed |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-SET ANSI_NULLS ON
+/*SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -1761,7 +1944,7 @@ CREATE PROCEDURE [dbo].[Role_GetListByObjectIdUserId]
 	@In BIT = 1
 AS
 BEGIN
-	DECLARE @SystemAdministratorRoleId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[RoleType] WHERE [Name] = 'System Administrators')
+	DECLARE @SystemAdministratorRoleId UNIQUEIDENTIFIER = [dbo].RoleType_AdministratorRoleID()
 	IF @In=1
 		SELECT 
 			[Id], 
@@ -1778,8 +1961,7 @@ BEGIN
 									WHERE [CompanyId]=(SELECT [Id] 
 														FROM [dbo].[Company] 
 														WHERE [IsMaster]=1) 
-															AND [RoleTypeId]=@SystemAdministratorRoleId
-								)
+															AND [RoleTypeId]=@SystemAdministratorRoleId)
 		-- Host System Administrators can't be removed, not showing
 		ORDER BY [CompanyId], [RoleTypeId]
 	ELSE
@@ -1794,6 +1976,7 @@ BEGIN
 END
 GO
 -- needs to be fixed |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+*/
 /****** Object:  StoredProcedure [dbo].[Company_DeleteById]    Script Date: 09/07/2017 14:00:15 ******/
 SET ANSI_NULLS ON
 GO
@@ -1837,39 +2020,40 @@ CREATE PROCEDURE [dbo].[Event_GetListByDeviceId]
 	@DeviceId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @CancelledId INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
-	SELECT [Id]							-- 0
-      , [Name]							-- 1
-      , [CompanyId]						-- 2
-      , [SourceDeviceId]				-- 3
-      , [DestinationDeviceId]			-- 4
-      , [StartTime]						-- 5
-      , [EndTime]						-- 6
-      , [CreatorId]						-- 7
-      , [CreatedOn]						-- 9
-      , [VideoProfileId]				--10
-      , [ParentId]						--11
-      , [RTT]							--12
-      , [PLEClientStreamConfigId]		--13
-      , [PLEServerStreamId]				--14
-      , [PLEServerConfigId]				--15
-      , [InputStreamId]					--16
-      , [OutputStreamId]					--17
-      , DATEDIFF(SECOND, CURRENT_TIMESTAMP, [StartTime]) AS StartTimeDiffSecond	--18
-      , CASE WHEN [EndTime] IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, [EndTime]) END AS EndTimeDiffSecond		--19
-      , [SourceAcknowledgement]			--20
-      , [DestinationAcknowledgement]		--21
-      , [EventStatusId]					--22
-      , [VBitRate]							--23
-      , [AudioChannels]					--24
-      , [OwnerId]							--25
-      , [ActualStarted]					--26
-      , [ActualEnded]						--27
-      , [ClosedCaption]					--28
-      , [SerialNumber]					--29
-      , [Tx]								--30
-      , [Rx]								--31
-      , CAST(0 AS BIT) AS AllDay
+	DECLARE @CancelledId INT = [dbo].EventStatus_byName('Cancelled')
+	SELECT 
+		[Id],							-- 0
+		[Name],							-- 1
+		[CompanyId],					-- 2
+		[SourceDeviceId],				-- 3
+		[DestinationDeviceId],			-- 4
+		[StartTime],					-- 5
+		[EndTime],						-- 6
+		[CreatorId],					-- 7
+		[CreatedOn],					-- 9
+		[VideoProfileId],				--10
+		[ParentId],						--11
+		[RTT],							--12
+		[PLEClientStreamConfigId],		--13
+		[PLEServerStreamId],			--14
+		[PLEServerConfigId],			--15
+		[InputStreamId],				--16
+		[OutputStreamId],				--17
+		DATEDIFF(SECOND, CURRENT_TIMESTAMP, [StartTime]) AS StartTimeDiffSecond	--18
+		CASE WHEN [EndTime], IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, [EndTime]) END AS EndTimeDiffSecond		--19
+		[SourceAcknowledgement],		--20
+		[DestinationAcknowledgement],	--21
+		[EventStatusId],				--22
+		[VBitRate],						--23
+		[AudioChannels],				--24
+		[OwnerId],						--25
+		[ActualStarted],				--26
+		[ActualEnded],					--27
+		[ClosedCaption],				--28
+		[SerialNumber],					--29
+		[Tx],							--30
+		[Rx],							--31
+		CAST(0 AS BIT) AS AllDay
 	FROM [dbo].[Event]
 	WHERE ([PLEClientStreamConfigId]=@DeviceId OR [PLEServerConfigId]=@DeviceId)
 		--AND ActualEnded IS NULL 
@@ -1902,7 +2086,7 @@ CREATE PROCEDURE [dbo].[Event_UpdateEventStatusById]
 AS
 BEGIN
 	UPDATE [dbo].[Event]
-	SET [EventStatusId] = @EventStatusId
+	SET [EventStatusId] = @StatusId
 	WHERE [Id] = @Id
 END
 GO
@@ -1957,29 +2141,29 @@ CREATE PROCEDURE [dbo].[Event_Update]
 AS
 BEGIN
 	UPDATE [dbo].[Event] SET 
-		[Name] = @Name
-		,[CompanyId] = @CompanyId
-        ,[SourceDeviceId] = @SourceDeviceId
-        ,[DestinationDeviceId] = @DestinationDeviceId
-        ,[StartTime] = @StartTime
-        ,[EndTime] = @EndTime
-        ,[CreatorId] = @CreatorId
-        ,[CreatedOn] = @CreatedOn
-        ,[VideoProfileId] = @VideoProfileId
-        ,[RTT] = @RTT
-        ,[PLEClientStreamConfigId] = @PLEClientStreamConfigId 
-        ,[PLEServerStreamId] = @PLEServerStreamId
-        ,[PLEServerConfigId] = @PLEServerConfigId
-        ,[InputStreamId] = @InputStreamId
-        ,[OutputStreamId] = @OutputStreamId
-        ,[SourceAcknowledgement] = @SourceAcknowledgement
-        ,[DestinationAcknowledgement] = @DestinationAcknowledgement
-        ,[EventStatusId] = @EventStatusId
-        ,[VBitRate] = @VBitRate
-        ,[AudioChannels] = @AudioChannels
-        ,[OwnerId] = @OwnerId
-        ,[ActualStarted] = @ActualStarted
-        ,[ActualEnded] = @ActualEnded
+		[Name] = @Name,
+		[CompanyId] = @CompanyId,
+        [SourceDeviceId] = @SourceDeviceId,
+        [DestinationDeviceId] = @DestinationDeviceId,
+        [StartTime] = @StartTime,
+        [EndTime] = @EndTime,
+        [CreatorId] = @CreatorId,
+        [CreatedOn] = @CreatedOn,
+        [VideoProfileId] = @VideoProfileId,
+        [RTT] = @RTT,
+        [PLEClientStreamConfigId] = @PLEClientStreamConfigId,
+        [PLEServerStreamId] = @PLEServerStreamId,
+        [PLEServerConfigId] = @PLEServerConfigId,
+        [InputStreamId] = @InputStreamId,
+        [OutputStreamId] = @OutputStreamId,
+        [SourceAcknowledgement] = @SourceAcknowledgement,
+        [DestinationAcknowledgement] = @DestinationAcknowledgement,
+        [EventStatusId] = @EventStatusId,
+        [VBitRate] = @VBitRate,
+        [AudioChannels] = @AudioChannels,
+        [OwnerId] = @OwnerId,
+        [ActualStarted] = @ActualStarted,
+        [ActualEnded] = @ActualEnded
 	WHERE [Id] = @Id
 END
 GO
@@ -2113,7 +2297,7 @@ CREATE PROCEDURE [dbo].[Role_RemoveUser]
 	@RoleCompanyId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @SystemAdministratorRoleId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[RoleType] WHERE [Name] = 'System Administrators')
+	DECLARE @SystemAdministratorRoleId UNIQUEIDENTIFIER = [dbo].RoleType_AdministratorRoleID()
 	IF NOT EXISTS(SELECT * FROM [dbo].[RoleCompany]	WHERE [Id]=@RoleCompanyId AND [RoleTypeId]=@SystemAdministratorRoleId) 
 			OR (SELECT COUNT(*)	FROM [dbo].[UserRole] WHERE [RoleCompanyId]=@RoleCompanyId)>1
 		DELETE [dbo].[UserRole] WHERE [UserId]=@UserId AND [RoleCompanyId]=@RoleCompanyId
@@ -2187,7 +2371,7 @@ BEGIN
 	FROM [dbo].[PLEClientStreamConfig]
 	WHERE (
 		[HostId] IN (SELECT [Id] FROM [dbo].[Host] WHERE [CompanyId] = (SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId))
-		OR (SELECT [Id] FROM [dbo].[Company] WHERE [IsMaster]=1) = (SELECT [dbo].[CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId)
+		OR (SELECT [Id] FROM [dbo].[Company] WHERE [IsMaster]=1) = (SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId)
 		OR [Id] IN (SELECT [PLEClientStreamConfigId] FROM [dbo].[Event]	WHERE [CompanyId] = (SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId)) AND @Type=1
 		OR [Id] IN (SELECT [DeviceId] FROM [dbo].[DeviceSharedToCompany] WHERE [CompanyId] = (SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId)) AND @Type=2
 	)
@@ -2319,7 +2503,7 @@ BEGIN
 			[CompanyId], 
 			[RoleTypeId]
 		FROM [dbo].[RoleCompany]
-		WHERE Id IN (SELECT [dbo].[RoleCompanyId] FROM [dbo].[UserRole] WHERE [UserId]=@UserId)
+		WHERE Id IN (SELECT [RoleCompanyId] FROM [dbo].[UserRole] WHERE [UserId]=@UserId)
 			AND [CompanyId]=(SELECT [CompanyId]	FROM [dbo].[User] WHERE [Id]=@UserId)
 			AND [RoleTypeId]<>@EveryoneRoleId
 		ORDER BY [Name]
@@ -2388,7 +2572,7 @@ BEGIN
 				[Password], 
 				[PersonId], 
 				[CompanyId], 
-				[Registered], 
+				[RegisteredOn], 
 				[PageId], 
 				[DateFormatId], 
 				[Enabled], 
@@ -2430,7 +2614,7 @@ BEGIN
 						[Name] = @Name,
 						[Password] = @Password,
 						[PageId] = @PageId,
-						[DateFormatId = @DateFormatId,
+						[DateFormatId] = @DateFormatId,
 						[Enabled] = @Enabled,
 						[EventNotifications] = @EventNotifications
 					WHERE [Id] = @Id
@@ -2448,10 +2632,10 @@ BEGIN
 			END TRY
 			BEGIN CATCH
 				IF @@TRANCOUNT > 0
-				BEGIN
-				ROLLBACK TRANSACTION
-				SELECT -2 AS SUCCESSFUL
-			END
+					BEGIN
+						ROLLBACK TRANSACTION
+						SELECT -2 AS SUCCESSFUL
+				END
 			END CATCH
 		END
 END
@@ -2630,12 +2814,7 @@ CREATE PROCEDURE [dbo].[Scope_ReadByUserIdPageNameButtonName]
 	@ButtonName VARCHAR(50)
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]=@PageName)
-	DECLARE @GridID UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Grid] WHERE [PageId] = @PageId)
-	DECLARE @ButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]=@ButtonName)
-	DECLARE @GridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]= @ButtonId)
-
-	SELECT dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridButtonId) AS ButtonScope
+	SELECT dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, [dbo].GridButton_ByNamePageName(@PageName,@ButtonName) ) AS ButtonScope
 END
 GO
 /****** Object:  StoredProcedure [dbo].[UserPerson_GetListByUserId]    Script Date: 09/07/2017 14:00:15 ******/
@@ -2647,15 +2826,9 @@ CREATE PROCEDURE [dbo].[UserPerson_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Users.aspx')
-	DECLARE @GridID UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Grid] WHERE [PageId] = @PageId)
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Delete')
-	DECLARE @RolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Roles')
-	
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@EditButtonId) 
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@DeleteButtonId) 
-	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@RolesButtonId) 
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Users.aspx','Edit')
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Users.aspx','Delete')
+	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Users.aspx','Roles')
 
 	SELECT 
 		[User].[Id],
@@ -2692,14 +2865,10 @@ CREATE PROCEDURE [dbo].[SConfiguration_GetListByUserId]
 AS
 BEGIN
 	
-	DECLARE @SConfigPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='SystemSettings.aspx')
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Delete')
-	DECLARE @RolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Roles')
+	DECLARE @AddGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Users.aspx','Add')
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Users.aspx','Edit')
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Users.aspx','Delete')
 	
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@EditButtonId) 
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@DeleteButtonId) 
-	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [GridId]=@GridId AND [ButtonId]=@RolesButtonId) 
 
 	SELECT 
 		[Id],
@@ -2708,7 +2877,7 @@ BEGIN
 		[StringValue],
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @AddGridButtonId) AS AddButton,
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) AS EditButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteGirdButtonId) AS DeleteButton
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteGridButtonId) AS DeleteButton
 	FROM [dbo].[Configuration]
 	ORDER BY [Name]
 END
@@ -2723,14 +2892,6 @@ CREATE PROCEDURE [dbo].[Role_GetListByGridButtonIdUserId]
 	@GridButtonId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @GridButtonRolesPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='GridButtonRoles.aspx')
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Delete')
-	DECLARE @RolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Roles')
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@GridButtonRolesPageId AND [ButtonId]=@EditButtonId)
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@GridButtonRolesPageId AND [ButtonId]=@DeleteButtonId) 
-	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@GridButtonRolesPageId AND [ButtonId]=@RolesButtonId) 
-	
 	SELECT 
 		[Id], 
 		[Name], 
@@ -2740,14 +2901,15 @@ BEGIN
 							FROM [dbo].[GridButtonRoleScope] 
 							WHERE [RoleCompanyId]=[dbo].[RoleCompany].[Id]
 								AND [dbo].[GridButtonRoleScope].[GridButtonId]=@GridButtonId)
-		THEN (SELECT TOP 1 [dbo].[Scope].[Id] 
-				FROM [dbo].[Scope] 
-				INNER JOIN [dbo].[GridButtonRoleScope] ON [dbo].[GridButtonRoleScope].[ScopeId]=[dbo].[Scope].[Id]
-				WHERE [dbo].[GridButtonRoleScope].[RoleCompanyId]=[dbo].[RoleCompany].[Id]
-					AND [dbo].[GridButtonRoleScope].[GridButtonId]=@GridButtonId
-				ORDER BY [dbo].[Scope].[Value])
-		ELSE (SELECT [Id] FROM [dbo].[Scope] WHERE Value=0) END AS ScopeId,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) AS EditButton
+			THEN (SELECT TOP 1 [dbo].[Scope].[Id] 
+					FROM [dbo].[Scope] 
+					INNER JOIN [dbo].[GridButtonRoleScope] ON [dbo].[GridButtonRoleScope].[ScopeId]=[dbo].[Scope].[Id]
+					WHERE [dbo].[GridButtonRoleScope].[RoleCompanyId]=[dbo].[RoleCompany].[Id]
+						AND [dbo].[GridButtonRoleScope].[GridButtonId]=@GridButtonId
+					ORDER BY [dbo].[Scope].[Value])
+			ELSE (SELECT [Id] FROM [dbo].[Scope] WHERE Value=0) 
+		END AS ScopeId,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, [dbo].GridButtonId_ByNamePageName('GridButtonRoles.aspx','Edit')) AS EditButton
 	FROM [dbo].[RoleCompany]
 	WHERE (SELECT [Id] FROM [dbo].[Company]	WHERE [IsMaster]=1)
 			=(SELECT [CompanyId] FROM [dbo].[User] WHERE Id=@UserId) 
@@ -2771,31 +2933,17 @@ CREATE PROCEDURE [dbo].[GridButton_GetListByPageIdUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	-- the button's page
-	DECLARE @ButtonPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='PageButtons.aspx')
-	-- buttons
-	DECLARE @AddButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Add')
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button]	WHERE [Name]='Edit')
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button]	WHERE [Name]='Delete')
-	DECLARE @PageButtonRolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='PageButtonRoles')
-	DECLARE @MoveDownButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Move Down')
-	DECLARE @MoveUpButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Move Up')
-	DECLARE @NewGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='NewGridButton')
-	DECLARE @GridEditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='GridEdit')
-	DECLARE @GridDeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='GridDelete')
-	DECLARE @GridButtonRolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Grid Button Roles')
 	-- grid buttons
-	DECLARE @AddGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton]	WHERE [PageId]=@ButonPageId AND [ButtonId]=@AddButtonId)
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@EditButtonId)
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@DeleteButtonId)
-	DECLARE @PageButtonRolesButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@PageButtonRolesButtonId)
-	DECLARE @MoveDownGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@MoveDownButtonId)
-	DECLARE @MoveUpGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@MoveUpButtonId)
-	DECLARE @NewGrigGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@NewGridButtonId)
-	DECLARE @GridEditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@GridEditButtonId)
-	DECLARE @GridDeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@GridDeleteButtonId)
-	DECLARE @GridButtonRolesGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButonPageId AND [ButtonId]=@GridButtonRolesButtonId)
-	
+	DECLARE @AddGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','Add')
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','Edit')
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','Delete')
+	DECLARE @PageButtonRolesGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','PageButtonRoles')
+	DECLARE @MoveDownGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','Move Down')
+	DECLARE @MoveUpGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','Move Up')
+	DECLARE @NewGridGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','NewGridButton')
+	DECLARE @GridEditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','GridEdit')
+	DECLARE @GridDeleteGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','GridDelete')
+	DECLARE @GridButtonRolesGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('PageButtons.aspx','Grid Button Roles')
 
 	SELECT
 		[Id],
@@ -2812,17 +2960,17 @@ BEGIN
 		(SELECT [Url] 
 			FROM [dbo].[Image] 
 			INNER JOIN [dbo].[Button] ON [dbo].[Button].[ImageId]=[dbo].[Image].[Id] 
-			WHERE [dbo].[Button].[Id]=[dbo].[PageButton].[ButtonId])							AS ImageUrl,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridAddButtonId) 			AS AddButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridEditButtonId) 			AS EditButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridDeleteButtonId) 		AS DeleteButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridPageButtonRolesButtonId)AS PageButtonRolesButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridMoveDownButtonId) 		AS MoveDownButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridMoveUpButtonId) 		AS MoveUpButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridNewGridButtonId) 		AS NewGridButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridEditButtonId) 			AS GridEditButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridDeleteButtonId) 		AS GridDeleteButton,
-		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridButtonRolesButtonId) 	AS GridButtonRolesButton
+			WHERE [dbo].[Button].[Id]=[dbo].[GridButton].[ButtonId])							AS ImageUrl,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @AddGridButtonId) 			AS AddButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) 			AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteGridButtonId) 		AS DeleteButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @PageButtonRolesGridButtonId)AS PageButtonRolesButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @MoveDownGridButtonId) 		AS MoveDownButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @MoveUpGridButtonId) 		AS MoveUpButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @NewGridGridButtonId) 		AS NewGridButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridEditGridButtonId) 		AS GridEditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridDeleteGridButtonId) 	AS GridDeleteButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GridButtonRolesGridButtonId)AS GridButtonRolesButton
 	FROM [dbo].[GridButton]
 	WHERE ([Id] IN (SELECT [GridButtonId] 
 						FROM [dbo].[GridButtonRoleScope]
@@ -2830,20 +2978,27 @@ BEGIN
 													FROM [UserRole] 
 													WHERE [UserId]=@UserId)))  
 		AND [PageId]=@PageId
-		AND (@PageGrid=2 OR 
-			(@PageGrid=0 AND ForGridUse=0) OR 
-			(@PageGrid=1 AND ForGridUse=1))
-	ORDER BY [ForGridUse], [Index]
+--		AND (@PageGrid=2 OR 
+--			(@PageGrid=0 AND ForGridUse=0) OR 
+--			(@PageGrid=1 AND ForGridUse=1)
+		
+	ORDER BY [Index]
 END
 GO
 
 
 
 
+--***************************************************************************************************************************************************
+--***************************************************************************************************************************************************
+--***************************************************************************************************************************************************
+--***************************************************************************************************************************************************
+
 
 -- this is the original procedure
 
 /****** Object:  StoredProcedure [dbo].[PageButton_GetListByPageIdUserIdPageGrid]    Script Date: 09/07/2017 14:00:15 ******/
+/*
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2962,6 +3117,7 @@ BEGIN
 		AND (@PageGrid=2 OR @PageGrid=0 AND ForGridUse=0 OR @PageGrid=1 AND ForGridUse=1)
 	ORDER BY ForGridUse, [Index]
 END
+*/
 --***************************************************************************************************************************************************
 --***************************************************************************************************************************************************
 --***************************************************************************************************************************************************
@@ -2994,67 +3150,79 @@ CREATE PROCEDURE [dbo].[Page_InsertUpdate]
 	@ImageId UNIQUEIDENTIFIER
 AS
 BEGIN
-	IF EXISTS(SELECT *
-	FROM Page
-	WHERE Id<>@Id AND Name=@Name)
+	IF EXISTS(SELECT * FROM [dbo].[Page] WHERE [Id]<>@Id AND [Name]=@Name)
 		SELECT 2 AS SUCCESSFUL
-	ELSE IF @ImageId IS NOT NULL AND @ImageId NOT IN (SELECT Id
-		FROM [dbo].[Image])
-		SELECT 3 AS SUCCESSFUL	-- Invalid ImageId
-	ELSE
-	BEGIN
-		BEGIN TRY
-			IF EXISTS(SELECT *
-		FROM Page
-		WHERE Id=@Id) --UPDATE
-			BEGIN
-			UPDATE Page SET Name = @Name,
-				BrowserTitle = @BrowserTitle,
-				PageTitle = @PageTitle,
-				Url = @Url,
-				AvailableOnDashboard = @AvailableOnDashboard,
-				ImageId = @ImageId
-				WHERE Id = @Id
-			IF @AvailableOnDashboard=0
-				BEGIN
-				DECLARE @UserDashboardItemId UNIQUEIDENTIFIER
-				DECLARE UserDashboardItem_Cursor CURSOR FOR
-					SELECT Id
-				FROM UserDashboardItem
-				WHERE ObjectId=@Id
-				OPEN UserDashboardItem_Cursor
-				FETCH NEXT FROM UserDashboardItem_Cursor INTO @UserDashboardItemId
-				WHILE @@FETCH_STATUS = 0
+	ELSE IF @ImageId IS NOT NULL AND @ImageId NOT IN (SELECT [Id] FROM [dbo].[Image])
+			SELECT 3 AS SUCCESSFUL	-- Invalid ImageId
+		ELSE
+			BEGIN TRY
+				BEGIN TRANSACTION
+					IF EXISTS(SELECT * FROM [dbo].[Page] WHERE [Id]=@Id) --UPDATE
+						BEGIN
+							UPDATE [dbo].[Page] SET 
+								[Name] = @Name,
+								[BrowserTitle] = @BrowserTitle,
+								[PageTitle] = @PageTitle,
+								[Url] = @Url,
+								[AvailableOnDashboard] = @AvailableOnDashboard,
+								[ImageId] = @ImageId
+							WHERE [Id] = @Id
+							IF @AvailableOnDashboard=0
+								BEGIN
+									DECLARE @UserDashBoardPageId UNIQUEIDENTIFIER
+									DECLARE UserDashboardItem_Cursor CURSOR 
+										FOR	SELECT [Id] FROM [dbo].[UserDashboardItem] WHERE [PageId]=@Id
+									OPEN UserDashboardItem_Cursor
+									
+									FETCH NEXT FROM UserDashboardItem_Cursor INTO @UserDashBoardPageId
+									
+									WHILE @@FETCH_STATUS = 0
+										BEGIN
+											EXEC UserDashboardItem_DeleteById @Id=@UserDashBoardPageId
+											FETCH NEXT FROM UserDashboardItem_Cursor INTO @UserDashBoardPageId
+										END
+										
+									CLOSE UserDashboardItem_Cursor
+									DEALLOCATE UserDashboardItem_Cursor
+								END
+							SELECT 1 AS SUCCESSFUL							-- Update SUCCESSFUL
+						END
+					ELSE
+						BEGIN
+							INSERT INTO [dbo].[Page](
+								[Id], 
+								[Name], 
+								[BrowserTitle], 
+								[PageTitle], 
+								[Url], 
+								[AvailableOnDashboard], 
+								[ImageId])
+							VALUES(
+								@Id, 
+								@Name, 
+								@BrowserTitle, 
+								@PageTitle, 
+								@Url, 
+								@AvailableOnDashboard, 
+								@ImageId)
+								
+							INSERT INTO [dbo].[PageRoleScope](
+								[PageId], 
+								[RoleCompanyId])
+							VALUES(
+								@Id,
+								[dbo].RoleType_AdministratorRoleID())
+							SELECT 0 AS SUCCESSFUL
+						END
+				COMMIT TRANSACTION
+			END TRY
+			BEGIN CATCH
+				IF @@TRANCOUNT > 0
 					BEGIN
-					EXEC UserDashboardItem_DeleteById @Id=@UserDashboardItemId
-					FETCH NEXT FROM UserDashboardItem_Cursor INTO @UserDashboardItemId
-				END
-				CLOSE UserDashboardItem_Cursor
-				DEALLOCATE UserDashboardItem_Cursor
-			END
-			SELECT 1 AS SUCCESSFUL
-		-- Update SUCCESSFUL
-		END
-			ELSE
-			BEGIN
-			INSERT INTO Page
-				(Id, Name, BrowserTitle, PageTitle, Url, AvailableOnDashboard, ImageId)
-			VALUES(@Id, @Name, @BrowserTitle, @PageTitle, @Url, @AvailableOnDashboard, @ImageId)
-			INSERT INTO RoleObjectScope
-				(ObjectId, RoleCompanyId)
-			VALUES(@Id, '212B9E56-6AD4-4612-B294-309E000DC4F6')
-			SELECT 0 AS SUCCESSFUL
-		END
-			COMMIT TRANSACTION
-		END TRY
-		BEGIN CATCH
-			IF @@TRANCOUNT > 0
-			BEGIN
-			ROLLBACK TRANSACTION
-			SELECT -2 AS SUCCESSFUL
-		END
-		END CATCH
-	END
+						ROLLBACK TRANSACTION
+						SELECT -2 AS SUCCESSFUL
+					END
+			END CATCH
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Page_GetListByUserId]    Script Date: 09/07/2017 14:00:15 ******/
@@ -3066,54 +3234,27 @@ CREATE PROCEDURE [dbo].[Page_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER
-	SELECT @PageId=Id
-	FROM Page
-	WHERE Url='Pages.aspx'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER
-	DECLARE @RolesButtonId UNIQUEIDENTIFIER
-	DECLARE @PageButtonsButtonId UNIQUEIDENTIFIER
-	SELECT @EditButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Edit') AND ForGridUse=1
-	SELECT @DeleteButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Delete') AND ForGridUse=1
-	SELECT @RolesButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Roles') AND ForGridUse=1
-	SELECT @PageButtonsButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='PageButtons') AND ForGridUse=1
-	SELECT [Id]
-		  , [Name]
-		  , [BrowserTitle]
-		  , [PageTitle]
-		  , [Url]
-		  , [AvailableOnDashboard]
-		  , [ImageId]
-		  , (SELECT Url
-		FROM [dbo].[Image]
-		WHERE Id=Page.ImageId) AS ImageUrl
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteButtonId) AS DeleteButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @RolesButtonId) AS RolesButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @PageButtonsButtonId) AS PageButtonsButton
-	FROM [Page]
-	WHERE Id IN(SELECT ObjectId
-	FROM RoleObjectScope
-	WHERE RoleCompanyId IN(SELECT RoleCompanyId
-	FROM UserRole
-	WHERE UserId=@UserId))
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Pages.aspx','Edit')
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Pages.aspx','Delete')
+	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Pages.aspx','Roles')
+	DECLARE @PageButtonGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Pages.aspx','PageButtons')
+	
+	SELECT 
+		[Id],
+		[Name],
+		[BrowserTitle],
+		[PageTitle],
+		[Url],
+		[AvailableOnDashboard],
+		[ImageId],
+		(SELECT [Url] FROM [dbo].[Image] WHERE [Id]=Page.ImageId) AS ImageUrl,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteGridButtonId) AS DeleteButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @RolesGridButtonId) AS RolesButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @PageButtonsGirdButtonId) AS PageButtonsButton,
+	FROM [dbo].[Page]
+	WHERE [Id] IN(SELECT [PageId] FROM [dbo].[PageRoleScope]
+	WHERE [RoleCompanyId] IN(SELECT [RoleCompanyId]	FROM [dbo].[UserRole] WHERE UserId=@UserId))
 	ORDER BY [Url], [Name]
 END
 GO
@@ -3126,56 +3267,52 @@ CREATE PROCEDURE [dbo].[Page_DeleteById]
 	@Id UNIQUEIDENTIFIER
 AS
 BEGIN
-	IF EXISTS(SELECT *
-	FROM [dbo].[MenuItem]
-	WHERE PageId=@Id)
+	IF EXISTS(SELECT * FROM [dbo].[MenuItem] WHERE [PageId]=@Id)
 		SELECT 1 AS SUCCESSFUL
-	ELSE IF EXISTS(SELECT *
-	FROM [User]
-	WHERE PageId=@Id)
-		SELECT 2 AS SUCCESSFUL
+	ELSE IF EXISTS(SELECT *	FROM [dbo].[User] WHERE [PageId]=@Id)
+			SELECT 2 AS SUCCESSFUL
 	--ELSE IF EXISTS(SELECT * FROM Grid WHERE PageId=@Id)
 	--	SELECT 3 AS SUCCESSFUL
-	ELSE
-	BEGIN
-		BEGIN TRY
-			BEGIN TRANSACTION
-				DELETE RoleObjectScope WHERE ObjectId IN (SELECT Id
-		FROM PageButton
-		WHERE PageId=@Id)
-				DELETE PageButton WHERE PageId=@Id OR RedirectPageId=@Id
-				DELETE Grid WHERE PageId=@Id
-				DELETE RoleObjectScope WHERE ObjectId=Id
-					DECLARE @UserDashboardItemId UNIQUEIDENTIFIER
-					DECLARE UserDashboardItem_Cursor CURSOR FOR
-					SELECT Id
-		FROM UserDashboardItem
-		WHERE ObjectId=@Id
-					OPEN UserDashboardItem_Cursor
-					FETCH NEXT FROM UserDashboardItem_Cursor INTO @UserDashboardItemId
-					WHILE @@FETCH_STATUS = 0
-					BEGIN
-			EXEC UserDashboardItem_DeleteById @Id=@UserDashboardItemId
-			FETCH NEXT FROM UserDashboardItem_Cursor INTO @UserDashboardItemId
-		END
-					CLOSE UserDashboardItem_Cursor
-					DEALLOCATE UserDashboardItem_Cursor
-				DELETE Page WHERE Id=@Id
-
-				SELECT 0 AS SUCCESSFUL
-
-			COMMIT TRANSACTION
-		END TRY
-		BEGIN CATCH
-			IF @@TRANCOUNT > 0
+		ELSE
 			BEGIN
-			CLOSE UserDashboardItem_Cursor
-			DEALLOCATE UserDashboardItem_Cursor
-			ROLLBACK TRANSACTION
-			SELECT -2 AS SUCCESSFUL
-		END
-		END CATCH
-	END
+				BEGIN TRY
+					BEGIN TRANSACTION
+						DELETE [dbo].[PageButtonRoleScope] WHERE [PageButonId] IN (SELECT [Id] FROM [dbo].[PageButton] WHERE [PageId]=@Id)
+						DELETE [dbo].[PageButton] WHERE [PageId]=@Id OR [RedirectPageId]=@Id
+						DELETE [dbo].[GridButtonRoleScope] WHERE [GridButonId] IN (SELECT [Id] FROM [dbo].[PageButton] WHERE [PageId]=@Id)
+						DELETE [dbo].[GridButton] WHERE [PageId]=@Id OR [RedirectPageId]=@Id
+						DELETE [dbo].[Grid] WHERE [PageId]=@Id
+						DELETE PageRoleScope WHERE [PageId]=Id
+						
+						DECLARE @UserDashBoardPageId UNIQUEIDENTIFIER
+						
+						DECLARE UserDashboardItem_Cursor CURSOR 
+						FOR	SELECT [Id]	FROM [dbo].[UserDashboardItem] WHERE [PageId]=@Id
+						OPEN UserDashboardItem_Cursor
+
+						FETCH NEXT FROM UserDashboardItem_Cursor INTO @UserDashBoardPageId
+						WHILE @@FETCH_STATUS = 0
+							BEGIN
+								EXEC UserDashboardItem_DeleteById @Id=@UserDashBoardPageId
+								FETCH NEXT FROM UserDashboardItem_Cursor INTO @UserDashBoardPageId
+							END
+						CLOSE UserDashboardItem_Cursor
+						DEALLOCATE UserDashboardItem_Cursor
+
+						DELETE [dbo].[Page] WHERE [Id]=@Id
+						SELECT 0 AS SUCCESSFUL
+					COMMIT TRANSACTION
+				END TRY
+				BEGIN CATCH
+					IF @@TRANCOUNT > 0
+						BEGIN
+							CLOSE UserDashboardItem_Cursor
+							DEALLOCATE UserDashboardItem_Cursor
+							ROLLBACK TRANSACTION
+							SELECT -2 AS SUCCESSFUL
+						END
+				END CATCH
+			END
 END
 GO
 /****** Object:  StoredProcedure [dbo].[MenuItems_GetListByUserId]    Script Date: 09/07/2017 14:00:15 ******/
@@ -3187,74 +3324,44 @@ CREATE PROCEDURE [dbo].[MenuItems_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER
-	SELECT @PageId=Id
-	FROM Page
-	WHERE Url='MenuItems.aspx'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER
-	DECLARE @RolesButtonId UNIQUEIDENTIFIER
-	DECLARE @MoveDownButtonId UNIQUEIDENTIFIER
-	DECLARE @MoveUpButtonId UNIQUEIDENTIFIER
-	SELECT @EditButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Edit') AND ForGridUse=1
-	SELECT @DeleteButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Delete') AND ForGridUse=1
-	SELECT @RolesButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Roles') AND ForGridUse=1
-	SELECT @MoveDownButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Move Down') AND ForGridUse=1
-	SELECT @MoveUpButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Move Up') AND ForGridUse=1
-	SELECT Id, Name, ParentId, Title, [Index], ToolTip, ImageId, PageId,
-		(SELECT MIN([MinMenuItem].[Index])
-		FROM [dbo].[MenuItem] [MinMenuItem]
-		WHERE [MinMenuItem].[ParentId] = [dbo].[MenuItem].[ParentId]) AS [MinIndex],
-		(SELECT MAX([MaxMenuItem].[Index])
-		FROM [dbo].[MenuItem] [MaxMenuItem]
-		WHERE [MaxMenuItem].[ParentId] = [dbo].[MenuItem].[ParentId]) AS [MaxIndex],
-		(SELECT COUNT(*)
-		FROM [dbo].[MenuItem] [Children]
-		WHERE [Children].[ParentId] = [dbo].[MenuItem].[Id]) AS [Children],
-		(CASE
-				WHEN [dbo].[MenuItem].[ParentId] IN (SELECT [RootItem].[Id]
-		FROM [dbo].[MenuItem] [RootItem]
-		WHERE UPPER(LTRIM(RTRIM([RootItem].[Name]))) = 'ROOT') THEN
-					([dbo].[MenuItem].[Index] * 1000)
-				ELSE
-					(((SELECT [ParentItem].[Index]
-		FROM [dbo].[MenuItem] [ParentItem]
-		WHERE [ParentItem].[Id] = [dbo].[MenuItem].[ParentId]) * 1000) + [dbo].[MenuItem].[Index] + 1)
-				END) AS [SortIndex],
-		(SELECT Url
-		FROM [dbo].[Image]
-		WHERE [Id]=[dbo].[MenuItem].[ImageId]) AS ImageUrl
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteButtonId) AS DeleteButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @RolesButtonId) AS RolesButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @MoveDownButtonId) AS MoveDownButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @MoveUpButtonId) AS MoveUpButton
+
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('MenuItems.aspx','Edit')
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('MenuItems.aspx','Delete')
+	DECLARE @RolesGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('MenuItems.aspx','Roles')
+	DECLARE @MoveDownGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('MenuItems.aspx','Move Down')
+	DECLARE @MoveUpGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('MenuItems.aspx','Move Up')
+		
+		
+	SELECT 
+		[Id], 
+		[Name], 
+		[ParentId], 
+		[Title], 
+		[Index], 
+		[ToolTip], 
+		[ImageId], 
+		[PageId],
+		(SELECT MIN([MinMenuItem].[Index]) FROM [dbo].[MenuItem] [MinMenuItem] WHERE [MinMenuItem].[ParentId] = [dbo].[MenuItem].[ParentId]) AS [MinIndex],
+		(SELECT MAX([MaxMenuItem].[Index]) FROM [dbo].[MenuItem] [MaxMenuItem] WHERE [MaxMenuItem].[ParentId] = [dbo].[MenuItem].[ParentId]) AS [MaxIndex],
+		(SELECT COUNT(*) FROM [dbo].[MenuItem] [Children] WHERE [Children].[ParentId] = [dbo].[MenuItem].[Id]) AS [Children],
+		(CASE WHEN [dbo].[MenuItem].[ParentId] IN (SELECT [RootItem].[Id] FROM [dbo].[MenuItem] [RootItem] WHERE UPPER(LTRIM(RTRIM([RootItem].[Name]))) = 'ROOT') 
+				THEN ([dbo].[MenuItem].[Index] * 1000)
+				ELSE (((SELECT [ParentItem].[Index]	FROM [dbo].[MenuItem] [ParentItem] WHERE [ParentItem].[Id] = [dbo].[MenuItem].[ParentId]) * 1000) + [dbo].[MenuItem].[Index] + 1)
+		END
+		) AS [SortIndex],
+		(SELECT Url	FROM [dbo].[Image] WHERE [Id]=[dbo].[MenuItem].[ImageId]) AS ImageUrl,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteGridButtonId) AS DeleteButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @RolesGridButtonId) AS RolesButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @MoveDownGridButtonId) AS MoveDownButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @MoveUpGridButtonId) AS MoveUpButton
 	FROM [dbo].[MenuItem]
-	WHERE Id IN(SELECT ObjectId
-		FROM RoleObjectScope
-		WHERE RoleCompanyId IN(SELECT RoleCompanyId
-		FROM UserRole
-		WHERE UserId=@UserId)) AND (ParentId IS NOT NULL)
+	WHERE [Id] IN(SELECT [MenuItemId]	
+					FROM [dbo].[MenuItemRoleScope] 
+					WHERE [RoleCompanyId] IN(SELECT [RoleCompanyId] 
+												FROM [dbo].[UserRole] 
+												WHERE [UserId]=@UserId)) 
+		AND ([ParentId] IS NOT NULL)
 	ORDER BY [SortIndex]
 END
 GO
@@ -3267,54 +3374,40 @@ CREATE PROCEDURE [dbo].[Host_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER
-	SELECT @PageId=Id
-	FROM Page
-	WHERE Url='Host.aspx'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER
-	DECLARE @ToolButtonId UNIQUEIDENTIFIER
-	DECLARE @APIButtonId UNIQUEIDENTIFIER
-	SELECT @EditButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Edit') AND ForGridUse=1
-	SELECT @ToolButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Tool Destination') AND ForGridUse=1
-	SELECT @APIButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='API') AND ForGridUse=1
-	SELECT [Id]
-      , [Name]
-      , [SerialNumber]
-      , [CompanyId]
-      , [LicenseKey]
-      , [IPAddress]
-      , [MacAddress]
-      , [Version]
-      , TunnelIP
-      , [ApiPort]
-      , [ApiPassword]
-      , [LanIPAddress]
-      , [LastCheckIn]
-      , CASE WHEN DATEDIFF(minute, LastCheckIn, CURRENT_TIMESTAMP)>20 THEN 'Red' WHEN DATEDIFF(minute, LastCheckIn, CURRENT_TIMESTAMP)>5 AND DATEDIFF(minute, LastCheckIn, CURRENT_TIMESTAMP)<=20 THEN 'Yellow' ELSE 'Green' END AS [EventStatus]
-      , CASE WHEN IPAddress IS NULL THEN '' ELSE IPAddress END + '|' + CASE WHEN TunnelIP IS NULL THEN '' ELSE TunnelIP END AS WebGuiAddresses
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ToolButtonId) AS ToolButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @APIButtonId) AS APIButton
-	FROM [Host]
-	WHERE ([CompanyId] = (SELECT CompanyId
-		FROM [User]
-		WHERE Id=@UserId) OR (SELECT Id
-		FROM Company
-		WHERE IsMaster=1)=(SELECT CompanyId
-		FROM [User]
-		WHERE Id=@UserId))
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Host.aspx','Edit')
+	DECLARE @ToolGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Host.aspx','Tool Destination')
+	DECLARE @APIGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Host.aspx','API')
+
+	SELECT 
+		[Id],
+		[Name],
+		[SerialNumber],
+		[CompanyId],
+		[LicenseKey],
+		[IPAddress],
+		[MacAddress],
+		[Version],
+		[TunnelIP],
+		[ApiPort],
+		[ApiPassword],
+		[LanIPAddress],
+		[LastCheckIn],
+		CASE WHEN DATEDIFF(MINUTE, [LastCheckIn], CURRENT_TIMESTAMP)>20 THEN 'Red' 
+			WHEN DATEDIFF(MINUTE, [LastCheckIn],CURRENT_TIMESTAMP)>5 AND DATEDIFF(MINUTE, [LastCheckIn], CURRENT_TIMESTAMP)<=20 THEN 'Yellow' 
+			ELSE 'Green' 
+		END AS [EventStatus],
+		CASE WHEN [IPAddress] IS NULL THEN '' 
+			ELSE [IPAddress] 
+			END + '|' + CASE WHEN [TunnelIP] IS NULL THEN '' 
+							ELSE [TunnelIP] 
+		END AS WebGuiAddresses,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @ToolGridButtonId) AS ToolButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @APIGridButtonId) AS APIButton
+	FROM [dbo].[Host]
+	WHERE ([CompanyId] = (SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId) 
+			OR (SELECT [Id] FROM [dbo].[Company] WHERE [IsMaster]=1)
+				=(SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId))
 	ORDER BY [Name]
 END
 GO
@@ -3327,33 +3420,18 @@ CREATE PROCEDURE [dbo].[Image_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER
-	SELECT @PageId=Id
-	FROM Page
-	WHERE Url='Images.aspx'
-	DECLARE @EditButtonId UNIQUEIDENTIFIER
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER
-	SELECT @EditButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Edit') AND ForGridUse=1
-	SELECT @DeleteButtonId=Id
-	FROM PageButton
-	WHERE PageId=@PageId AND ButtonId=(SELECT Id
-		FROM Button
-		WHERE Name='Delete') AND ForGridUse=1
-	SELECT [Id]								-- 0
-		  , [Name]							-- 1
-		  , [Url]						-- 2
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton
-		, dbo.Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteButtonId) AS DeleteButton
-	FROM [[dbo].[Image]]
-	WHERE ((SELECT Id
-	FROM Company
-	WHERE IsMaster=1)=(SELECT CompanyId
-	FROM [User]
-	WHERE Id=@UserId))
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Images.aspx','Edit')
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Images.aspx','Delete')
+
+	SELECT 
+		[Id],						-- 0
+		[Name],						-- 1
+		[Url],						-- 2
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditGridButtonId) AS EditButton,
+		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @DeleteGridButtonId) AS DeleteButton,
+	FROM [dbo].[Image] 
+	WHERE ((SELECT [Id] FROM [dbo].[Company] WHERE [IsMaster]=1)
+			=(SELECT [CompanyId] FROM [dbo].[User] WHERE [Id]=@UserId))
 	ORDER BY [Name]
 END
 GO
@@ -3366,22 +3444,7 @@ CREATE PROCEDURE [dbo].[EventHistory_GetListByEventId]
 	@EventId UNIQUEIDENTIFIER
 AS
 BEGIN
-	SELECT [Id]
-		  , [EventId]
-		  , [UserId]
-		  , [ModifiedOn]
-		  , [EventActionId]
-		  , ClosedCaption
-		  , Name
-		  , StartTime
-		  , EndTime
-		  , OwnerId
-		  , VideoProfileId
-		  , VBitRate
-		  , AudioChannels
-	FROM [EventHistory]
-	WHERE [EventId]=@EventId
-	ORDER BY [ModifiedOn] DESC
+	SELECT *vFROM [dbo].[EventHistory] WHERE [EventId]=@EventId	ORDER BY [ModifiedOn] DESC
 END
 GO
 /****** Object:  StoredProcedure [dbo].[Event_Insert]    Script Date: 09/07/2017 14:00:15 ******/
@@ -3423,7 +3486,7 @@ AS
 BEGIN
 	IF @StartNow = 1
 		SET @StartTime = GETDATE()
-	DECLARE @CancelledId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+	DECLARE @CancelledId INT = [dbo].EventStatus_byName('Cancelled')
 	IF EXISTS (SELECT [Name] 
 				FROM [dbo].[Event] 
 				WHERE ([PLEClientStreamConfigId]=@PLEClientStreamConfigId OR PLEServerConfigId=@PLEServerConfigId) 
@@ -3441,104 +3504,104 @@ BEGIN
 		BEGIN
 			BEGIN TRY
 				BEGIN TRANSACTION
-				DECLARE @EventActionId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[EventAction] WHERE [Name]='Schedule')
-			INSERT INTO [dbo].[Event](
-				[Id],
-				[Name],
-				[CompanyId],
-				[SourceDeviceId],
-				[DestinationDeviceId],
-				[StartTime],
-				[EndTime],
-				[CreatorId],
-				[CreatedOn],
-				[VideoProfileId],
-				[ParentId],
-				[RTT],
-				[PLEClientStreamConfigId],
-				[PLEServerStreamId],
-				[PLEServerConfigId],
-				[InputStreamId],
-				[OutputStreamId],
-				[SourceAcknowledgement],
-				[DestinationAcknowledgement],
-				[EventStatusId],
-				[VBitRate],
-				[AudioChannels],
-				[OwnerId],
-				[ActualStarted],
-				[ActualEnded],
-				[ClosedCaption],
-				[Tx],
-				[Rx])
-			VALUES(
-				@Id,
-				@Name,
-				@CompanyId,
-				@SourceDeviceId,
-				@DestinationDeviceId,
-				@StartTime,
-				@EndTime,
-				@CreatorId,
-				@CreatedOn,
-				@VideoProfileId,
-				@ParentId,
-				@RTT,
-				@PLEClientStreamConfigId,
-				@PLEServerStreamId,
-				@PLEServerConfigId,
-				@InputStreamId,
-				@OutputStreamId,
-				@SourceAcknowledgement,
-				@DestinationAcknowledgement,
-				@EventStatusId,
-				@VBitRate,
-				@AudioChannels,
-				@OwnerId,
-				@ActualStarted,
-				@ActualEnded,
-				@ClosedCaption,
-				@Tx,
-				@Rx)
-			
-			INSERT INTO [dbo].[EventHistory](
-				[Id],
-				[EventId],
-				[UserId],
-				[ModifiedOn],
-				[EventActionId],
-				[ClosedCaption],
-				[Name],
-				[StartTime],
-				[EndTime],
-				[OwnerId],
-				[VideoProfileId],
-				[VBitRate],
-				[AudioChannels])
-			VALUES(
-				NEWID(),
-				@Id,
-				@CreatorId,
-				GETDATE(),
-				@EventActionId,
-				@ClosedCaption,
-				@Name,
-				@StartTime,
-				@EndTime,
-				@OwnerId,
-				@VideoProfileId,
-				@VBitRate,
-				@AudioChannels)
+				DECLARE @Schedule_EventActionId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[EventAction] WHERE [Name]='Schedule')
+				INSERT INTO [dbo].[Event](
+					[Id],
+					[Name],
+					[CompanyId],
+					[SourceDeviceId],
+					[DestinationDeviceId],
+					[StartTime],
+					[EndTime],
+					[CreatorId],
+					[CreatedOn],
+					[VideoProfileId],
+					[ParentId],
+					[RTT],
+					[PLEClientStreamConfigId],
+					[PLEServerStreamId],
+					[PLEServerConfigId],
+					[InputStreamId],
+					[OutputStreamId],
+					[SourceAcknowledgement],
+					[DestinationAcknowledgement],
+					[EventStatusId],
+					[VBitRate],
+					[AudioChannels],
+					[OwnerId],
+					[ActualStarted],
+					[ActualEnded],
+					[ClosedCaption],
+					[Tx],
+					[Rx])
+				VALUES(
+					@Id,
+					@Name,
+					@CompanyId,
+					@SourceDeviceId,
+					@DestinationDeviceId,
+					@StartTime,
+					@EndTime,
+					@CreatorId,
+					@CreatedOn,
+					@VideoProfileId,
+					@ParentId,
+					@RTT,
+					@PLEClientStreamConfigId,
+					@PLEServerStreamId,
+					@PLEServerConfigId,
+					@InputStreamId,
+					@OutputStreamId,
+					@SourceAcknowledgement,
+					@DestinationAcknowledgement,
+					@EventStatusId,
+					@VBitRate,
+					@AudioChannels,
+					@OwnerId,
+					@ActualStarted,
+					@ActualEnded,
+					@ClosedCaption,
+					@Tx,
+					@Rx)
 				
-			SELECT CAST(1 AS BIT) AS SUCCESSFUL
+				INSERT INTO [dbo].[EventHistory](
+					[Id],
+					[EventId],
+					[UserId],
+					[ModifiedOn],
+					[EventActionId],
+					[ClosedCaption],
+					[Name],
+					[StartTime],
+					[EndTime],
+					[OwnerId],
+					[VideoProfileId],
+					[VBitRate],
+					[AudioChannels])
+				VALUES(
+					NEWID(),
+					@Id,
+					@CreatorId,
+					GETDATE(),
+					@Schedule_EventActionId,
+					@ClosedCaption,
+					@Name,
+					@StartTime,
+					@EndTime,
+					@OwnerId,
+					@VideoProfileId,
+					@VBitRate,
+					@AudioChannels)
+					
+				SELECT CAST(1 AS BIT) AS SUCCESSFUL
 			COMMIT TRANSACTION
 		END TRY
 		BEGIN CATCH
 			IF @@TRANCOUNT > 0
-			BEGIN
-			ROLLBACK TRANSACTION
-			SELECT CAST(0 AS BIT) AS SUCCESSFUL
-		END
+				BEGIN
+					ROLLBACK TRANSACTION
+					SELECT CAST(0 AS BIT) AS SUCCESSFUL
+				END
 		END CATCH
 	END
 END
@@ -3555,8 +3618,11 @@ AS
 BEGIN
 	BEGIN TRY
 		BEGIN TRANSACTION
+			DECLARE @GoodnightingStatusId UNIQUEIDENTIFIER = [dbo].EventStatus_byName('Goodnighting') 
+			DECLARE @GoodnightEventActionId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[EventAction] WHERE [Name]='Goodnight')
+			
 			UPDATE [dbo].[Event] SET 
-				[EventStatusId]=(SELECT [Id] FROM .[dbo].[EventStatus] WHERE [Name] = 'Goodnighting') 
+				[EventStatusId]= @GoodnightingStatusId
 			WHERE [Id]=@EventId
 			
 			INSERT INTO [dbo].[EventHistory](
@@ -3578,7 +3644,7 @@ BEGIN
 				[Id] AS [EventId],
 				@UserId,
 				GETDATE() AS [ModifiedOn],
-				(SELECT [Id] FROM [dbo].[EventAction] WHERE [Name]='Goodnight') AS EventActionId,
+				@GoodnightEventActionId AS EventActionId,
 				[ClosedCaption],
 				[Name],
 				[StartTime],
@@ -3625,7 +3691,7 @@ BEGIN
 				SET @StartTime = GETDATE()
 			DECLARE @PLEClientStreamConfigId UNIQUEIDENTIFIER
 			DECLARE @PLEServerConfigId UNIQUEIDENTIFIER
-			DECLARE @CancelledId INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+			DECLARE @CancelledId INT = [dbo].EventStatus_byName('Cancelled')
 			SELECT 
 				@PLEClientStreamConfigId=PLEClientStreamConfigId,
 				@PLEServerConfigId=PLEServerConfigId
@@ -3707,49 +3773,53 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[Event_GetListByUserIdStatusPageUrl]
 	@UserId UNIQUEIDENTIFIER,
-	@Monitor_Status INT = 0,
-	@PageUrl VARCHAR(100)
--- 0: all
--- 1: running;
--- 2: future;
--- 3: past
--- 4: cancelled
--- 5: cleared
+	@PageUrl VARCHAR(100),
+	@Monitor_Status INT = 0
+	-- 0: all
+	-- 1: running;
+	-- 2: future;
+	-- 3: past
+	-- 4: cancelled
+	-- 5: cleared
 AS
 BEGIN
 
-	-- Ronny 
-	DECLARE @MonitorStatus_AllId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'All')
-	DECLARE @MonitorStatus_RunningId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Running')
-	DECLARE @MonitorStatus_FutureId INT	= (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Future')
-	DECLARE @MonitorStatus_PastId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Past')
-	DECLARE @MonitorStatus_CancelledId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
-	DECLARE @MonitorStatus_ClearedId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cleared')
+	-- Monitor status
+	DECLARE @MonitorStatus_AllId INT = (SELECT [Id] FROM [dbo].[MonitorStatus] WHERE [Name] = 'All')
+	DECLARE @MonitorStatus_RunningId INT = (SELECT [Id] FROM [dbo].[MonitorStatus] WHERE [Name] = 'Running')
+	DECLARE @MonitorStatus_FutureId INT	= (SELECT [Id] FROM [dbo].[MonitorStatus] WHERE [Name] = 'Future')
+	DECLARE @MonitorStatus_PastId INT = (SELECT [Id] FROM [dbo].[MonitorStatus] WHERE [Name] = 'Past')
+	DECLARE @MonitorStatus_CancelledId INT = (SELECT [Id] FROM [dbo].[MonitorStatus] WHERE [Name] = 'Cancelled')
+	DECLARE @MonitorStatus_ClearedId INT = (SELECT [Id] FROM [dbo].[MonitorStatus] WHERE [Name] = 'Cleared')
 
-	DECLARE @All_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'All')
-	DECLARE @Scheduled_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Scheduled')
-	DECLARE @Starting_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Starting')
-	DECLARE @Started_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Started')
-	DECLARE @Stopping_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping')
-	DECLARE @Stopped_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Stopped')
-	DECLARE @Goodnighting_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Goodnighting')
-	DECLARE @Goodnighted_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Goodnighted')
-	DECLARE @Clearing_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Clearing')
-	DECLARE @Cleared_Id INT	= (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Cleared')
-	DECLARE @Cancelled_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+	-- Event status
+	DECLARE @All_Id INT	= [dbo].EventStatus_byName('All')
+	DECLARE @Scheduled_Id INT = [dbo].EventStatus_byName('Scheduled')
+	DECLARE @Starting_Id INT = [dbo].EventStatus_byName('Starting')
+	DECLARE @Started_Id INT	= [dbo].EventStatus_byName('Started')
+	DECLARE @Stopping_Id INT = [dbo].EventStatus_byName('Stopping')
+	DECLARE @Stopped_Id INT	= [dbo].EventStatus_byName('Stopped')
+	DECLARE @Goodnighting_Id INT = [dbo].EventStatus_byName('Goodnighting')
+	DECLARE @Goodnighted_Id INT	= [dbo].EventStatus_byName('Goodnighted')
+	DECLARE @Clearing_Id INT = [dbo].EventStatus_byName('Clearing')
+	DECLARE @Cleared_Id INT	= [dbo].EventStatus_byName('Cleared')
+	DECLARE @Cancelled_Id INT = [dbo].EventStatus_byName('Cancelled')
 
+	-- the page
 	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]=@PageUrl)
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit'))
-	DECLARE @CancelButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Cancel'))
-	DECLARE @GoodnightButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Goodnight'))
-	DECLARE @ExtendButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Extend'))
-	DECLARE @ConnectionButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Connection'))
-	DECLARE @VideoButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Video'))
-	DECLARE @ClearButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Clear'))
-	DECLARE @RestartEncoderButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Restart Encoder'))
-	DECLARE @ToolSourceButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Tool Source'))
-	DECLARE @ToolDestinationButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Tool Destination'))
-	DECLARE @LogButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=(SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Log'))
+	
+	-- the grid buttons
+	DECLARE @EditButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Edit')
+	DECLARE @CancelButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Cancel')
+	DECLARE @GoodnightButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Goodnight')
+	DECLARE @ExtendButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Extend')
+	DECLARE @ConnectionButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Connection')
+	DECLARE @VideoButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Video')
+	DECLARE @ClearButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Clear')
+	DECLARE @RestartEncoderButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Restart Encoder')
+	DECLARE @ToolSourceButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Tool Source')
+	DECLARE @ToolDestinationButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Tool Destination')
+	DECLARE @LogButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName(@PageUrl,'Log')
 	
 	SELECT 
 		[Event].[Id],						-- 0
@@ -3808,6 +3878,7 @@ BEGIN
 				WHEN [EventStatusId] = @Cancelled_Id THEN @MonitorStatus_CancelledId	
 				WHEN [EventStatusId]=@Cleared_Id THEN @MonitorStatus_ClearedId		
 			END AS SchedulingStatus,
+		
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton,
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @CancelButtonId) AS CancelButton,
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @GoodnightButtonId) AS GoodnightButton,
@@ -3828,11 +3899,11 @@ BEGIN
 	INNER JOIN [dbo].[PLEClientStreamConfig] 
 		INNER JOIN [dbo].[Host] HostSource 
 			ON [HostSource].[Id]=[dbo].[PLEClientStreamConfig].[HostId] 
-	ON [dbo].[PLEClientStreamConfig].[Id]=[dbo].[Event].[PLEClientStreamConfigId]
+		ON [dbo].[PLEClientStreamConfig].[Id]=[dbo].[Event].[PLEClientStreamConfigId]
 	INNER JOIN [dbo].[PLEServerStream] 
 		INNER JOIN [dbo].[Host] HostDestination 
 			ON [HostDestination].[Id]=[dbo].[PLEServerStream].[HostId] 
-	ON [dbo].[PLEServerStream].[Id]=[dbo].[Event].[PLEServerStreamId]
+		ON [dbo].[PLEServerStream].[Id]=[dbo].[Event].[PLEServerStreamId]
 
 	WHERE ([Event].[CompanyId] = @CompanyId 
 			OR (SELECT [Id] FROM [dbo].[Company] WHERE [IsMaster]=1)=@CompanyId 
@@ -3866,7 +3937,7 @@ BEGIN
 			DECLARE @EndTime DATETIME
 			DECLARE @PLEClientStreamConfigId UNIQUEIDENTIFIER
 			DECLARE @PLEServerConfigId UNIQUEIDENTIFIER
-			DECLARE @CancelledId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+			DECLARE @CancelledId INT = [dbo].EventStatus_byName('Cancelled')
 			SELECT 
 				@StartTime=EndTime, 
 				@EndTime=DATEADD(minute,@Timespan, EndTime),
@@ -3943,7 +4014,7 @@ AS
 BEGIN
 	BEGIN TRY
 		BEGIN TRANSACTION
-			DECLARE @CancelledId INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Cancelled')
+			DECLARE @CancelledId INT = [dbo].EventStatus_byName('Cancelled')
 			UPDATE [dbo].[Event] SET [EventStatusId]=@CancelledId WHERE Id=@EventId
 			INSERT INTO [dbo].[EventHistory](
 				[Id],
@@ -3996,11 +4067,8 @@ CREATE PROCEDURE [dbo].[Device_GetListByHostIdUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Host.aspx')
-	DECLARE @CalendarButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Calendar')
-	DECLARE @PermissionsButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Device Permissions')
-	DECLARE @CalendarGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@PageId AND [ButtonId]=@CalendarButtonId)
-	DECLARE @PermissionsGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton]	WHERE [PageId]=@PageId AND [ButtonId]=@PermissionsButtonId)
+	DECLARE @CalendarGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Host.aspx','Calendar')
+	DECLARE @PermissionsGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Host.aspx','Device Permissions')
 
 	SELECT 
 		[Id], 
@@ -4008,7 +4076,11 @@ BEGIN
 		[HostId], 
 		[ConfigFileName], 
 		[Type],
-		CASE [Type] WHEN 'Encoder Internal' THEN 0 WHEN 'Encoder External' THEN 1 WHEN 'Decoder Internal' THEN 2 WHEN 'Decoder External' THEN 3 END AS SortOrder,
+		CASE [Type] WHEN 'Encoder Internal' THEN 0 
+					WHEN 'Encoder External' THEN 1 
+					WHEN 'Decoder Internal' THEN 2 
+					WHEN 'Decoder External' THEN 3 
+		END AS SortOrder,
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @CalendarGridButtonId) AS CalendarButton,
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @PermissionsGridButtonId) AS PermissionsButton,
 		(SELECT [CompanyId] FROM [dbo].[Host] WHERE [Id]=[dbo].[View_HostDevice].[HostId]) AS CompanyId,
@@ -4027,12 +4099,8 @@ CREATE PROCEDURE [dbo].[Company_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[Page] WHERE [Url]='Companies.aspx')
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[Button]	WHERE [Name]='Delete')
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButtonPageId AND [ButtonId]=@EditButtonId)
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[GridButton]	WHERE [PageId]=@ButtonPageId AND [ButtonId]=@DeleteButtonId)
-
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Companies.aspx','Edit')
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Companies.aspx','Delete')
 	SELECT
 		[View_Company].*,
 		[dbo].Function_MaxScopeValue_ByUserIdGridButtonId(@UserId, @EditButtonId) AS EditButton,
@@ -4054,11 +4122,8 @@ CREATE PROCEDURE [dbo].[Button_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @PageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Buttons.aspx')
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[Button]	WHERE [Name]='Delete')
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButtonPageId AND [ButtonId]=@EditButtonId)
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[GridButton]	WHERE [PageId]=@ButtonPageId AND [ButtonId]=@DeleteButtonId)
+	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Buttons.aspx','Edit')
+	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Buttons.aspx','Delete')
 
 	SELECT 
 		[Id], 
@@ -4084,12 +4149,8 @@ CREATE PROCEDURE [dbo].[BrandUrl_GetListByUserIdBrandId]
 	@BrandId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @ButtonPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Brands.aspx')
-	DECLARE @EditSubButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='EditSub')
-	DECLARE @DeleteSubButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button]	WHERE [Name]='DeleteSub')
-	DECLARE @EditSubGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButtonPageId AND [ButtonId]=@EditSubButtonId)
-	DECLARE @DeleteSubGridButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[GridButton]	WHERE [PageId]=@ButtonPageId AND [ButtonId]=@DeleteSubButtonId)
-
+	DECLARE @EditGridSubButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Brands.aspx','EditSub')
+	DECLARE @DeleteGridSubButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Brands.aspx','DeleteSub')
 	SELECT 
 		[Id],
       	[BrandId],
@@ -4110,11 +4171,8 @@ CREATE PROCEDURE [dbo].[Brand_GetListByUserId]
 	@UserId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DECLARE @ButtonPageId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Page] WHERE [Url]='Brands.aspx')
-	DECLARE @EditButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[Button] WHERE [Name]='Edit')
-	DECLARE @DeleteButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[Button]	WHERE [Name]='Delete')
-	DECLARE @EditGridButtonId UNIQUEIDENTIFIER = (SELECT [Id] FROM [dbo].[GridButton] WHERE [PageId]=@ButtonPageId AND [ButtonId]=@EditButtonId)
-	DECLARE @DeleteGridButtonId UNIQUEIDENTIFIER = (SELECT [Id]	FROM [dbo].[GridButton]	WHERE [PageId]=@ButtonPageId AND [ButtonId]=@DeleteButtonId)
+	DECLARE @EditGridSubButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Brands.aspx','Edit')
+	DECLARE @DeleteGridSubButtonId UNIQUEIDENTIFIER = [dbo].GridButtonId_ByNamePageName('Brands.aspx','Delete')
 	
 	SELECT 
 		[Id],
@@ -4153,8 +4211,8 @@ GO
 CREATE PROCEDURE [dbo].[Event_Scheduled_Stop]
 AS
 BEGIN
-	DECLARE	@Started_Id INT = (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Started');
-	DECLARE	@Stopping_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping');
+	DECLARE	@Started_Id INT = [dbo].EventStatus_byName('Started');
+	DECLARE	@Stopping_Id INT = [dbo].EventStatus_byName('Stopping');
 
 	-- Updates the events that were started by the DeviceCaster
 	UPDATE [dbo].[Event] SET 
@@ -4178,8 +4236,8 @@ GO
 CREATE PROCEDURE [dbo].[Event_Scheduled_Start]
 AS
 BEGIN
-	DECLARE	@Scheduled_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Scheduled');
-	DECLARE	@Starting_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Starting');
+	DECLARE	@Scheduled_Id INT = [dbo].EventStatus_byName('Scheduled');
+	DECLARE	@Starting_Id INT = [dbo].EventStatus_byName('Starting');
 	DECLARE @In_Advance_Period_Minute INT = 1 -- this value is subject to possible modification
 
 	-- Update the events that are due wiht in one minute
@@ -4205,10 +4263,10 @@ GO
 CREATE PROCEDURE [dbo].[Event_Scheduled_Clear]
 AS
 BEGIN
-	DECLARE	@Starting_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Starting');
-	DECLARE	@Stopping_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping');
-	DECLARE @Goodnighting_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Goodnighting');
-	DECLARE	@Clearing_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Clearing');
+	DECLARE	@Starting_Id INT = [dbo].EventStatus_byName('Starting')
+	DECLARE	@Stopping_Id INT = [dbo].EventStatus_byName('Stopping');
+	DECLARE @Goodnighting_Id INT = [dbo].EventStatus_byName('Goodnighting');
+	DECLARE	@Clearing_Id INT = [dbo].EventStatus_byName('Clearing');
 	DECLARE @Grace_period_Minute INT = 5; -- this value is subject to possible modification
 
 	-- Flag only the events that keep "ing" for 5 min after the ending time
@@ -4235,8 +4293,8 @@ CREATE PROCEDURE [dbo].[Event_GetStoppingListByHostId]
 
 AS
 BEGIN
-	DECLARE	@Stopping_Id INT =	(SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping');
-	DECLARE @Goodnighting_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Goodnighting');
+	DECLARE	@Stopping_Id INT =	[dbo].EventStatus_byName('Stopping');
+	DECLARE @Goodnighting_Id INT = [dbo].EventStatus_byName('Goodnighting');
 
 
 	SELECT 
@@ -4258,7 +4316,9 @@ BEGIN
 		[InputStreamId],					--16
 		[OutputStreamId],					--17
 		DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond,	--18
-		CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond,		--19
+		CASE WHEN [EndTime] IS NULL THEN 1 
+			ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) 
+		END AS EndTimeDiffSecond,		--19
 		[SourceAcknowledgement],			--20
 		[DestinationAcknowledgement],		--21
 		[EventStatusId],						--22
@@ -4295,7 +4355,7 @@ CREATE PROCEDURE [dbo].[Event_GetStartingListByHostId]
 AS
 BEGIN
 
-	DECLARE	@Starting_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Starting');
+	DECLARE	@Starting_Id INT = [dbo].EventStatus_byName('Starting');
 
 	SELECT 
 		[Id],							-- 0
@@ -4316,7 +4376,9 @@ BEGIN
 		[InputStreamId],					--16
 		[OutputStreamId],					--17
 		DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond,	--18
-		CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond,		--19
+		CASE WHEN EndTime IS NULL THEN 1 
+			ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) 
+		END AS EndTimeDiffSecond,		--19
 		[SourceAcknowledgement],			--20
 		[DestinationAcknowledgement],		--21
 		[EventStatusId],						--22
@@ -4353,8 +4415,8 @@ CREATE PROCEDURE [dbo].[Event_GetStartedListByHostId]
 AS
 BEGIN
 
-	DECLARE	@Started_Id INT = (SELECT [Id] FROM [dbo].[EventStatus]	WHERE [Name] = 'Started');
-	DECLARE	@Stopping_Id INT = (SELECT [Id]	FROM [dbo].[EventStatus] WHERE [Name] = 'Stopping');
+	DECLARE	@Started_Id INT = [dbo].EventStatus_byName('Started');
+	DECLARE	@Stopping_Id INT = [dbo].EventStatus_byName('Stopping');
 
 	SELECT 
 		[Id],							-- 0
@@ -4375,7 +4437,9 @@ BEGIN
 		[InputStreamId],					--16
 		[OutputStreamId],					--17
 		DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond,	--18
-		CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond,		--19
+		CASE WHEN EndTime IS NULL THEN 1 
+			ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) 
+		END AS EndTimeDiffSecond,		--19
 		[SourceAcknowledgement],			--20
 		[DestinationAcknowledgement],		--21
 		[EventStatusId],						--22
@@ -4390,7 +4454,7 @@ BEGIN
 		[Rx]								--31
 	FROM [dbo].[Event]
 	WHERE ([PLEClientStreamConfigId] IN (SELECT [Id] FROM [dbo].[PLEClientStreamConfig] WHERE HostId=@HostId)
-				OR [PLEServerStreamId]	IN (SELECT [Id] FROM [dbo].[PLEServerStream] WHERE HostId=@HostId))
+			OR [PLEServerStreamId]	IN (SELECT [Id] FROM [dbo].[PLEServerStream] WHERE [HostId]=@HostId))
 		AND [EventStatusId]=@Started_Id 
 		AND ([EndTime] IS NULL OR [EndTime]>CURRENT_TIMESTAMP)
 	ORDER BY [StartTime]
@@ -4411,44 +4475,46 @@ CREATE PROCEDURE [dbo].[Event_GetClearingListByHostId]
 
 AS
 BEGIN
-	DECLARE @Clearing_Id INT = (SELECT [Id] FROM [dbo].[EventStatus] WHERE [Name] = 'Clearing');
+	DECLARE @Clearing_Id INT = [dbo].EventStatus_byName('Clearing');
 
 	SELECT 
 		[Id],							-- 0
 		[Name],							-- 1
-		[CompanyId],						-- 2
-		[SourceDeviceId],					-- 3
+		[CompanyId],					-- 2
+		[SourceDeviceId],				-- 3
 		[DestinationDeviceId],			-- 4
-		[StartTime],						-- 5
+		[StartTime],					-- 5
 		[EndTime],						-- 6
-		[CreatorId],						-- 7
-		[CreatedOn],						-- 9
-		[VideoProfileId],					--10
+		[CreatorId],					-- 7
+		[CreatedOn],					-- 9
+		[VideoProfileId],				--10
 		[ParentId],						--11
 		[RTT],							--12
 		[PLEClientStreamConfigId],		--13
-		[PLEServerStreamId],				--14
-		[PLEServerConfigId],				--15
-		[InputStreamId],					--16
-		[OutputStreamId],					--17
+		[PLEServerStreamId],			--14
+		[PLEServerConfigId],			--15
+		[InputStreamId],				--16
+		[OutputStreamId],				--17
 		DATEDIFF(SECOND, CURRENT_TIMESTAMP, StartTime) AS StartTimeDiffSecond,	--18
-		CASE WHEN EndTime IS NULL THEN 1 ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) END AS EndTimeDiffSecond,		--19
-		[SourceAcknowledgement],			--20
-		[DestinationAcknowledgement],		--21
-		[EventStatusId],						--22
+		CASE WHEN EndTime IS NULL THEN 1 
+			ELSE DATEDIFF(SECOND, CURRENT_TIMESTAMP, EndTime) 
+		END AS EndTimeDiffSecond,		--19
+		[SourceAcknowledgement],		--20
+		[DestinationAcknowledgement],	--21
+		[EventStatusId],				--22
 		[VBitRate],						--23
-		[AudioChannels],					--24
+		[AudioChannels],				--24
 		[OwnerId],						--25
-		[ActualStarted],					--26
+		[ActualStarted],				--26
 		[ActualEnded],					--27
-		[ClosedCaption],					--28
+		[ClosedCaption],				--28
 		[SerialNumber],					--29
-		[Tx],								--30
+		[Tx],							--30
 		[Rx]
 	--31
 	FROM [dbo].[Event]
 	WHERE ([PLEClientStreamConfigId] IN (SELECT [Id] FROM [dbo].[PLEClientStreamConfig] WHERE [HostId]=@HostId)
-				OR [PLEServerStreamId]	IN (SELECT [Id] FROM [dbo].[PLEServerStream] WHERE HostId=@HostId))
+			OR [PLEServerStreamId] IN (SELECT [Id] FROM [dbo].[PLEServerStream] WHERE [HostId]=@HostId))
 		AND [EventStatusId]=@Clearing_Id
 	ORDER BY [StartTime]
 
